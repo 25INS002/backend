@@ -6,7 +6,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password", "date_joined"]  # use date_joined instead of registered_at
+        fields = ["username", "email", "password", "date_joined","first_name","last_name"]  # i want user name instead of date_joined
         read_only_fields = ["date_joined"]
 
     def create(self, validated_data):
@@ -14,5 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             email=validated_data.get("email"),
             password=validated_data["password"],
+            first_name=validated_data.get("first_name"),
+            last_name=validated_data.get("last_name"),
         )
         return user
