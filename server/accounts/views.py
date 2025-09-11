@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 import random, datetime
+from .auth import CookieJWTAuthentication
 from django.contrib.auth.hashers import make_password
 
 # For demo: In-memory OTP store → replace with Redis/DB in production
@@ -21,11 +22,12 @@ class SignupView(generics.CreateAPIView):
         username = request.data.get("username")
         email = request.data.get("email")
         password = request.data.get("password")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        
 
-        if not username or not email or not password:
-            return Response(
-                {"error": "All fields required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        if not username or not email or not password or not first_name or not last_name:
+            return Response({"error": "All fields required"}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(username=username).exists():
             return Response(
@@ -39,9 +41,7 @@ class SignupView(generics.CreateAPIView):
             )
 
         # Create inactive user (will be activated after OTP verification)
-        user = User.objects.create_user(
-            username=username, email=email, password=password, is_active=False
-        )
+        user = User.objects.create_user(username=username, email=email, password=password, is_active=False, first_name=first_name, last_name=last_name)
 
         # Generate OTP
         otp = str(random.randint(100000, 999999))
@@ -283,6 +283,25 @@ class ResetPasswordView(APIView):
                 {"message": "Password reset successful"}, status=status.HTTP_200_OK
             )
         except User.DoesNotExist:
-            return Response(
-                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+# --- GET LOGGED IN USER INFO ---
+class UserDetailView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User with this email not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "date_joined": user.date_joined,
+        })
