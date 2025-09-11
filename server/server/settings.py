@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "adminpanel",
     "modules",
     "events",
+    "feedback",
+    "services",
 ]
 
 # Auth settings

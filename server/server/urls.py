@@ -27,7 +27,9 @@ urlpatterns = [
     path("api/profile/", include("profiles.urls")),  # your media app
     path("api/adminpanel/", include("adminpanel.urls")),  # admin endpoints
     path("api/modules/", include("modules.urls")),  # module endpoints
-    path("api/events/", include("events.urls")),  # module endpoints
+    path("api/events/", include("events.urls")),  # events endpoints
+    path("api/feedback/", include("feedback.urls")),  # feedback endpoints
+    path("api/services/", include("services.urls")),  # services endpoints
 ]
 
 if settings.DEBUG:
