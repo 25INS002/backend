@@ -166,7 +166,8 @@ class LoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
-
+        user.last_login = datetime.datetime.now()
+        user.save()
         response = Response({"message": "Login successful"})
         # Set HttpOnly cookies
         response.set_cookie(
@@ -304,6 +305,10 @@ class UserDetailView(APIView):
             "first_name": user.first_name,
             "last_name": user.last_name,
             "date_joined": user.date_joined,
+            "is_staff": user.is_staff,
+            "is_active": user.is_active,
+            "is_superuser": user.is_superuser,
+            "last_login": user.last_login,
         })
 
 # --- REFRESH TOKEN ---
