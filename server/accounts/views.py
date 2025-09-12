@@ -4,7 +4,9 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 import random, datetime
 from .auth import CookieJWTAuthentication
 from django.contrib.auth.hashers import make_password
@@ -286,22 +288,80 @@ class ResetPasswordView(APIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 # --- GET LOGGED IN USER INFO ---
 class UserDetailView(APIView):
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [CookieJWTAuthentication]  # your custom cookie-based JWT auth
     permission_classes = [IsAuthenticated]
-    def get(self, request):
-        email = request.data.get("email")
-        if not email:
-            return Response({"error": "Email required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"error": "User with this email not found"}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request):  # ✅ use GET (not POST)
+        user = request.user  # already populated from the cookie
+
+        if not user or not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
         return Response({
+            "id": user.id,
             "username": user.username,
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "date_joined": user.date_joined,
         })
+
+# --- REFRESH TOKEN ---
+class TokenRefreshView(APIView):
+    """
+    This view is specifically designed to work with HttpOnly cookies.
+    It reads the refresh token from the request's cookies and, if valid,
+    returns a new access token as an HttpOnly cookie.
+    """
+    permission_classes = [AllowAny] # No auth token is needed to refresh
+
+    def post(self, request):
+        # 1. Get the refresh token from the HttpOnly cookie
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            return Response(
+                {"error": "Refresh token not found in cookies."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # 2. Validate the refresh token and generate a new access token
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+
+            # 3. (Highly Recommended) Implement Refresh Token Rotation
+            # This invalidates the old refresh token and issues a new one.
+            new_refresh_token = str(refresh)
+
+            # 4. Create a response object and set the new cookies
+            response = Response({
+                "detail": "Access token refreshed successfully."
+            }, status=status.HTTP_200_OK)
+
+            # NOTE: For production, set secure=True to ensure cookies are only sent over HTTPS.
+            # SameSite='Lax' is a good default for security.
+            response.set_cookie(
+                key='access_token',
+                value=new_access_token,
+                httponly=True,
+                secure=False,  # Change to True in production
+                samesite='Lax'
+            )
+            
+            response.set_cookie(
+                key='refresh_token',
+                value=new_refresh_token,
+                httponly=True,
+                secure=False,  # Change to True in production
+                samesite='Lax'
+            )
+
+            return response
+
+        except (TokenError, InvalidToken) as e:
+            # This will catch expired or malformed tokens
+            return Response(
+                {"error": "Invalid or expired refresh token."}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
