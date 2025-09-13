@@ -31,7 +31,19 @@ class CreateAdminView(generics.GenericAPIView):
             is_staff=True  # admin
         )
         return Response({"message": "Admin created"}, status=201)
+# -- Get Users By Ids ---
+class GetUsersByIdsView(generics.GenericAPIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAdminOrSuperAdmin]
 
+    def post(self, request):
+        user_ids = request.data.get("user_ids", [])
+        if not isinstance(user_ids, list) or not all(isinstance(i, int) for i in user_ids):
+            return Response({"error": "user_ids must be a list of integers"}, status=400)
+
+        users = User.objects.filter(id__in=user_ids)
+        serializer = AdminUserSerializer(users, many=True)
+        return Response(serializer.data, status=200)
 
 # --- List Users ---
 class ListUsersView(generics.ListAPIView):
