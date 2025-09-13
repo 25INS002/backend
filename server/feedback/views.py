@@ -12,6 +12,13 @@ class FeedbackCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+# List all feedback 
+class FeedbackListView(generics.ListAPIView):
+    serializer_class = FeedbackSerializer
+    authentication_classes = [CookieJWTAuthentication]
+
+    def get_queryset(self):
+        return Feedback.objects.all().order_by("created_at")
 
 # List feedback for a module
 class ModuleFeedbackListView(generics.ListAPIView):
