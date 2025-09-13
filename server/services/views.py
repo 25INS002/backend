@@ -17,8 +17,8 @@ class ServiceCreateView(generics.CreateAPIView):
 class ServiceListView(generics.ListAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [IsSuperAdmin or IsAdminOrSuperAdmin]
+    # authentication_classes = [CookieJWTAuthentication]
+    # permission_classes = [IsSuperAdmin or IsAdminOrSuperAdmin]
 
 
 # Update service (partial update allowed, only admin who created it or superadmin)
