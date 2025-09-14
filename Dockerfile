@@ -1,4 +1,4 @@
-# Use official Python image
+#Use official Python image
 FROM python:3.11-slim
 
 # Set working directory
@@ -24,5 +24,9 @@ WORKDIR /app/server
 # Expose port
 EXPOSE 8000
 
-# Run Django server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Copy entrypoint script
+COPY entrypoint.sh /app/server/entrypoint.sh
+RUN chmod +x /app/server/entrypoint.sh
+RUN mkdir -p /app/server && chmod -R 777 /app/server
+# Run entrypoint script
+CMD ["sh","./entrypoint.sh"]
