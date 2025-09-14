@@ -88,9 +88,13 @@ MIDDLEWARE = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4000",
+    "http://10.10.120.78:4000",
+    "http://127.0.0.1:4000",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:4000",
+    "http://10.10.120.78:4000",
+    "http://127.0.0.1:4000",
 ]
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True  # required if using HTTPS
