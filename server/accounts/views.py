@@ -10,7 +10,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 import random, datetime
 from .auth import CookieJWTAuthentication
 from django.contrib.auth.hashers import make_password
-
+from utils.util import send_otp_email
 # For demo: In-memory OTP store → replace with Redis/DB in production
 otp_store = {}  # { "username": { "otp": "123456", "expires_at": datetime } }
 reset_otp_store = {}
@@ -46,15 +46,18 @@ class SignupView(generics.CreateAPIView):
         user = User.objects.create_user(username=username, email=email, password=password, is_active=False, first_name=first_name, last_name=last_name)
 
         # Generate OTP
-        otp = str(random.randint(100000, 999999))
+        otp = send_otp_email(email, reason="signup")
         otp_store[username] = {
             "otp": otp,
             "expires_at": datetime.datetime.now() + datetime.timedelta(minutes=15),
         }
-
+        
         # ⚠️ In production: send OTP via email/SMS
         return Response(
-            {"message": "User created. Verify OTP to activate.", "otp": otp, "username": username},
+            {
+                "message": "User created. Verify OTP to activate.",
+                "username":user.username
+            },
             status=status.HTTP_201_CREATED,
         )
 
@@ -81,7 +84,7 @@ class ResendSignupOTPView(APIView):
             )
 
         # Generate new OTP
-        otp = str(random.randint(100000, 999999))
+        otp = send_otp_email(user.email, reason="signup")
         otp_store[username] = {
             "otp": otp,
             "expires_at": datetime.datetime.now() + datetime.timedelta(minutes=15),
@@ -89,7 +92,7 @@ class ResendSignupOTPView(APIView):
 
         # ⚠️ In production → send OTP via email/SMS
         return Response(
-            {"message": "OTP resent", "otp": otp}, status=status.HTTP_200_OK
+            {"message": "OTP resent"}, status=status.HTTP_200_OK
         )
 
 
@@ -205,7 +208,7 @@ class RequestPasswordResetOTPView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        otp = str(random.randint(100000, 999999))
+        otp = send_otp_email(email, reason="forgotpassword")
         reset_otp_store[email] = {
             "otp": otp,
             "expires_at": datetime.datetime.now() + datetime.timedelta(minutes=15),
@@ -213,7 +216,7 @@ class RequestPasswordResetOTPView(APIView):
 
         # ⚠️ In production → send OTP via email/SMS, not in response
         return Response(
-            {"message": "OTP sent to email", "otp": otp}, status=status.HTTP_200_OK
+            {"message": "OTP sent to email"}, status=status.HTTP_200_OK
         )
 
 
@@ -234,7 +237,7 @@ class ResendPasswordResetOTPView(APIView):
             )
 
         # Generate new OTP
-        otp = str(random.randint(100000, 999999))
+        otp = send_otp_email(email, reason="forgotpassword")
         reset_otp_store[email] = {
             "otp": otp,
             "expires_at": datetime.datetime.now() + datetime.timedelta(minutes=15),
@@ -242,7 +245,7 @@ class ResendPasswordResetOTPView(APIView):
 
         # ⚠️ In production → send OTP via email/SMS
         return Response(
-            {"message": "Reset OTP resent", "otp": otp}, status=status.HTTP_200_OK
+            {"message": "Reset OTP resent"}, status=status.HTTP_200_OK
         )
 
 
@@ -292,7 +295,7 @@ class UserDetailView(APIView):
     authentication_classes = [CookieJWTAuthentication]  # your custom cookie-based JWT auth
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):  # ✅ use GET (not POST)
+    def get(self, request):  # use GET (not POST)
         user = request.user  # already populated from the cookie
 
         if not user or not user.is_authenticated:

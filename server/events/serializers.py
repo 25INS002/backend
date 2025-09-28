@@ -10,7 +10,7 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             "id", "name", "date", "duration", "description", "long_description",
-            "media", "media_url", "participants", "participants_usernames", "admin"
+            "media", "media_url", "participants", "participants_usernames", "admin","reg_end_date"
         ]
         read_only_fields = ["id", "media_url", "admin", "participants_usernames"]
 

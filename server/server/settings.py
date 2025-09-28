@@ -16,7 +16,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 from datetime import timedelta
-
+from dotenv import load_dotenv
+import os
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -26,8 +27,19 @@ SECRET_KEY = "django-insecure-j5-=zs01=w+2*(g+_+$fs16+suhraup1jf@_zbrds%84mua)41
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
+
+# Mailing
+load_dotenv()
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get("GMAIL_USER")        # your Gmail address
+EMAIL_HOST_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")  # 16-char app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Application definition
 
@@ -90,14 +102,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:4000",
     "http://10.10.120.78:4000",
     "http://127.0.0.1:4000",
+    "http://72.60.102.111:4000",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:4000",
     "http://10.10.120.78:4000",
     "http://127.0.0.1:4000",
+    "http://72.60.102.111:4000",
 ]
 SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SECURE = True  # required if using HTTPS
+SESSION_COOKIE_SECURE = False  # required if using HTTPS
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = True
 
 ROOT_URLCONF = "server.urls"
 
