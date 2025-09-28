@@ -33,16 +33,14 @@ class AvailabilityNestedSerializer(serializers.ModelSerializer):
 # Serializer for the Service model
 class ServiceSerializer(serializers.ModelSerializer):
     # For GET requests → read availability slots
-    availability_slots_read = AvailabilitySerializer(
-        source='availability_slots', many=True, read_only=True
-    )
+    availability_slots = AvailabilitySerializer(many=True, read_only=True)
 
     # For GET requests → read admin info
     admin = UserSerializer(read_only=True)
 
     # For POST/PUT requests → accept nested availability slots
-    availability_slots = AvailabilityNestedSerializer(
-        many=True, write_only=True, required=False
+    availability_slots_write = AvailabilityNestedSerializer(
+        many=True, write_only=True, required=False, source='availability_slots'
     )
 
     # Additional computed fields
@@ -54,8 +52,8 @@ class ServiceSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'long_description', 'media',
             'cost_discount', 'admin', 'created_at', 'updated_at',
-            'availability_slots_read',  # read-only
-            'availability_slots',       # write-only
+            'availability_slots',        # read-only
+            'availability_slots_write',  # write-only
             'available_plans',          # computed field
             'plan_names',               # computed field
         ]
@@ -104,7 +102,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         """
         Custom create method to handle the nested availability_slots.
         """
-        # Extract availability data
+        # Extract availability data using the correct source name
         availability_data = validated_data.pop('availability_slots', [])
         
         # Get the current user from context
@@ -124,6 +122,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         """
         Custom update method to handle nested availability_slots.
         """
+        # Extract availability data using the correct source name
         availability_data = validated_data.pop('availability_slots', None)
         
         # Update service fields
