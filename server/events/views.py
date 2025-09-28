@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from .models import Event
 from .serializers import EventSerializer
 from accounts.auth import CookieJWTAuthentication
-
+from django.utils import timezone
+from rest_framework.views import APIView
 
 # --- Create Event (admin only) ---
 class EventCreateView(generics.CreateAPIView):
@@ -78,21 +79,85 @@ class EventDeleteView(generics.DestroyAPIView):
 
 # --- Add participant to event ---
 class AddParticipantView(generics.UpdateAPIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk, *args, **kwargs):
+        """
+        POST /events/add-participant/<pk>/
+        Adds the current user as participant to the event
+        """
+        try:
+            event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
+            return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        event.participants.add(user)
+        event.save()
+
+        return Response({"message": "Registered successfully"}, status=status.HTTP_200_OK)
+
+
+# --- Get Active Events (currently running) ---
+class ActiveEventsView(generics.ListAPIView):
     serializer_class = EventSerializer
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Event.objects.all()
-    lookup_field = "pk"
 
-    def post(self, request, *args, **kwargs):
-        event = self.get_object()
-        user_id = request.data.get("user_id")
+    def get_queryset(self):
+        now = timezone.now()
+        return Event.objects.filter(date__lte=now, duration__gte=now)
+
+
+# --- Get Finished Events ---
+class FinishedEventsView(generics.ListAPIView):
+    serializer_class = EventSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        now = timezone.now()
+        return Event.objects.filter(duration__lt=now)
+
+
+# --- Get Scheduled Events (upcoming, not started yet) ---
+class ScheduledEventsView(generics.ListAPIView):
+    serializer_class = EventSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        now = timezone.now()
+        return Event.objects.filter(date__gt=now)
+
+
+# --- Get Events User Participated In ---
+class UserEventsView(generics.ListAPIView):
+    serializer_class = EventSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.events_participated.all()
+    
+# --- Check if current user participates in event ---
+class CheckParticipationView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        """
+        GET /events/<pk>/participants/me/
+        """
+        user = request.user
         try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
+            event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
             return Response(
-                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        event.participants.add(user)
-        event.save()
-        return Response(EventSerializer(event).data, status=status.HTTP_200_OK)
+
+        is_participating = event.participants.filter(id=user.id).exists()
+        return Response({"is_participating": is_participating})

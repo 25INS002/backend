@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Event(models.Model):
     name = models.CharField(max_length=200)
-    date = models.DateTimeField()
-    duration = models.DurationField(help_text="Duration in HH:MM:SS")
+    date = models.DateTimeField() # event start date-time
+    duration = models.DateTimeField() # event end date-time
+    reg_end_date = models.DateTimeField(default=timezone.now) # event registeration end date-time
     description = models.TextField()
     long_description = models.TextField(blank=True)
     media = models.FileField(upload_to="events_media/", blank=True, null=True)

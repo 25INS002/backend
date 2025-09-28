@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .serializers import AdminUserSerializer
 from .permissions import IsSuperAdmin, IsAdminOrSuperAdmin
 from accounts.auth import CookieJWTAuthentication
+from django.db.models import Q
 
 # --- Create Admin (Superadmin only) ---
 class CreateAdminView(generics.GenericAPIView):
@@ -56,6 +57,32 @@ class ListUsersView(generics.ListAPIView):
             return User.objects.filter(is_staff=False, is_superuser=False)
         return User.objects.all()
 
+# --- Get Only Admins (not superuser) ---
+class GetAdminsView(generics.ListAPIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAdminOrSuperAdmin]
+    serializer_class = AdminUserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=True, is_superuser=False)
+   
+# --- Get Only Superadmins ---
+class GetSuperAdminsView(generics.ListAPIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAdminOrSuperAdmin]
+    serializer_class = AdminUserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(is_superuser=True)
+
+# --- Get Both Admins and Superadmins ---
+class GetAdminsAndSuperAdminsView(generics.ListAPIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAdminOrSuperAdmin]
+    serializer_class = AdminUserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(Q(is_staff=True) | Q(is_superuser=True))  # includes both staff (admins) and superusers
 
 # --- Update User ---
 class UpdateUserView(generics.UpdateAPIView):
