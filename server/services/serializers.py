@@ -329,7 +329,8 @@ class ServiceListSerializer(serializers.ModelSerializer):
         model = Service
         fields = [
             'id', 'name', 'description', 'media', 'admin_name', 
-            'plan_count', 'created_at'
+            'plan_count', 'created_at', 'long_description', 'cost_discount',
+            
         ]
 
     def get_plan_count(self, obj):

@@ -11,6 +11,7 @@ import random, datetime
 from .auth import CookieJWTAuthentication
 from django.contrib.auth.hashers import make_password
 from utils.util import send_otp_email
+
 # For demo: In-memory OTP store → replace with Redis/DB in production
 otp_store = {}  # { "username": { "otp": "123456", "expires_at": datetime } }
 reset_otp_store = {}
@@ -26,10 +27,11 @@ class SignupView(generics.CreateAPIView):
         password = request.data.get("password")
         first_name = request.data.get("first_name")
         last_name = request.data.get("last_name")
-        
 
         if not username or not email or not password or not first_name or not last_name:
-            return Response({"error": "All fields required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "All fields required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         if User.objects.filter(username=username).exists():
             return Response(
@@ -43,7 +45,14 @@ class SignupView(generics.CreateAPIView):
             )
 
         # Create inactive user (will be activated after OTP verification)
-        user = User.objects.create_user(username=username, email=email, password=password, is_active=False, first_name=first_name, last_name=last_name)
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            is_active=False,
+            first_name=first_name,
+            last_name=last_name,
+        )
 
         # Generate OTP
         otp = send_otp_email(email, reason="signup")
@@ -51,12 +60,12 @@ class SignupView(generics.CreateAPIView):
             "otp": otp,
             "expires_at": datetime.datetime.now() + datetime.timedelta(minutes=15),
         }
-        
+
         # ⚠️ In production: send OTP via email/SMS
         return Response(
             {
                 "message": "User created. Verify OTP to activate.",
-                "username":user.username
+                "username": user.username,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -91,9 +100,7 @@ class ResendSignupOTPView(APIView):
         }
 
         # ⚠️ In production → send OTP via email/SMS
-        return Response(
-            {"message": "OTP resent"}, status=status.HTTP_200_OK
-        )
+        return Response({"message": "OTP resent"}, status=status.HTTP_200_OK)
 
 
 # --- VERIFY OTP FOR SIGNUP ---
@@ -215,9 +222,7 @@ class RequestPasswordResetOTPView(APIView):
         }
 
         # ⚠️ In production → send OTP via email/SMS, not in response
-        return Response(
-            {"message": "OTP sent to email"}, status=status.HTTP_200_OK
-        )
+        return Response({"message": "OTP sent to email"}, status=status.HTTP_200_OK)
 
 
 # --- RESEND RESET PASSWORD OTP ---
@@ -244,9 +249,7 @@ class ResendPasswordResetOTPView(APIView):
         }
 
         # ⚠️ In production → send OTP via email/SMS
-        return Response(
-            {"message": "Reset OTP resent"}, status=status.HTTP_200_OK
-        )
+        return Response({"message": "Reset OTP resent"}, status=status.HTTP_200_OK)
 
 
 # --- VERIFY OTP & RESET PASSWORD ---
@@ -289,30 +292,95 @@ class ResetPasswordView(APIView):
                 {"message": "Password reset successful"}, status=status.HTTP_200_OK
             )
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
 # --- GET LOGGED IN USER INFO ---
 class UserDetailView(APIView):
-    authentication_classes = [CookieJWTAuthentication]  # your custom cookie-based JWT auth
+    authentication_classes = [
+        CookieJWTAuthentication
+    ]  # your custom cookie-based JWT auth
     permission_classes = [IsAuthenticated]
 
     def get(self, request):  # use GET (not POST)
         user = request.user  # already populated from the cookie
 
         if not user or not user.is_authenticated:
-            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Authentication required"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-        return Response({
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "date_joined": user.date_joined,
-            "is_staff": user.is_staff,
-            "is_active": user.is_active,
-            "is_superuser": user.is_superuser,
-            "last_login": user.last_login,
-        })
+        return Response(
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "date_joined": user.date_joined,
+                "is_staff": user.is_staff,
+                "is_active": user.is_active,
+                "is_superuser": user.is_superuser,
+                "last_login": user.last_login,
+            }
+        )
+
+
+# --- UPDATE USER PROFILE ---
+class UpdateProfileView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        # Fields that can be updated
+        updatable_fields = ["first_name", "last_name", "email"]
+
+        # Validate email uniqueness if changing email
+        new_email = data.get("email")
+        if new_email and new_email != user.email:
+            if User.objects.filter(email=new_email).exclude(id=user.id).exists():
+                return Response(
+                    {"error": "Email already exists"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Update fields
+        for field in updatable_fields:
+            if field in data:
+                setattr(user, field, data[field])
+
+        try:
+            user.save()
+            return Response(
+                {
+                    "message": "Profile updated successfully",
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "date_joined": user.date_joined,
+                        "is_staff": user.is_staff,
+                        "is_active": user.is_active,
+                        "is_superuser": user.is_superuser,
+                        "last_login": user.last_login,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {"error": "Failed to update profile"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
 
 # --- REFRESH TOKEN ---
 class TokenRefreshView(APIView):
@@ -321,16 +389,17 @@ class TokenRefreshView(APIView):
     It reads the refresh token from the request's cookies and, if valid,
     returns a new access token as an HttpOnly cookie.
     """
-    permission_classes = [AllowAny] # No auth token is needed to refresh
+
+    permission_classes = [AllowAny]  # No auth token is needed to refresh
 
     def post(self, request):
         # 1. Get the refresh token from the HttpOnly cookie
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
             return Response(
-                {"error": "Refresh token not found in cookies."}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Refresh token not found in cookies."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -343,26 +412,27 @@ class TokenRefreshView(APIView):
             new_refresh_token = str(refresh)
 
             # 4. Create a response object and set the new cookies
-            response = Response({
-                "detail": "Access token refreshed successfully."
-            }, status=status.HTTP_200_OK)
+            response = Response(
+                {"detail": "Access token refreshed successfully."},
+                status=status.HTTP_200_OK,
+            )
 
             # NOTE: For production, set secure=True to ensure cookies are only sent over HTTPS.
             # SameSite='Lax' is a good default for security.
             response.set_cookie(
-                key='access_token',
+                key="access_token",
                 value=new_access_token,
                 httponly=True,
                 secure=False,  # Change to True in production
-                samesite='Lax'
+                samesite="Lax",
             )
-            
+
             response.set_cookie(
-                key='refresh_token',
+                key="refresh_token",
                 value=new_refresh_token,
                 httponly=True,
                 secure=False,  # Change to True in production
-                samesite='Lax'
+                samesite="Lax",
             )
 
             return response
@@ -370,6 +440,6 @@ class TokenRefreshView(APIView):
         except (TokenError, InvalidToken) as e:
             # This will catch expired or malformed tokens
             return Response(
-                {"error": "Invalid or expired refresh token."}, 
-                status=status.HTTP_401_UNAUTHORIZED
+                {"error": "Invalid or expired refresh token."},
+                status=status.HTTP_401_UNAUTHORIZED,
             )
