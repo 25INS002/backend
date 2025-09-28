@@ -54,7 +54,7 @@ class SignupView(generics.CreateAPIView):
 
         # ⚠️ In production: send OTP via email/SMS
         return Response(
-            {"message": "User created. Verify OTP to activate.", "otp": otp},
+            {"message": "User created. Verify OTP to activate.", "otp": otp, "username": username},
             status=status.HTTP_201_CREATED,
         )
 
