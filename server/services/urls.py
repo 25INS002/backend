@@ -28,6 +28,7 @@ urlpatterns = [
     
     # Admin URLs
     path('admin/requests/', views.AdminServiceRequestListView.as_view(), name='admin-requests'),
+    path('admin/requests/<int:pk>/', views.AdminServiceRequestRetrieveView.as_view(), name='admin-request-detail'),
     path('admin/requests/<int:pk>/update/', views.AdminServiceRequestUpdateView.as_view(), name='admin-request-update'),
     path('admin/my-services/', views.MyServicesListView.as_view(), name='my-services'),
 ]

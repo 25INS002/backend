@@ -3,9 +3,11 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .models import Event
 from .serializers import EventSerializer
+from .serializers import UserSerializer
 from accounts.auth import CookieJWTAuthentication
 from django.utils import timezone
 from rest_framework.views import APIView
+
 
 # --- Create Event (admin only) ---
 class EventCreateView(generics.CreateAPIView):
@@ -28,6 +30,21 @@ class EventListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Event.objects.all()
+
+
+# --- List Events ---
+class AdminEventListView(generics.ListAPIView):
+    serializer_class = EventSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            # superusers can see everything
+            return Event.objects.all()
+        # regular admins only see their own events
+        return Event.objects.filter(admin=user)
 
 
 # --- Retrieve Event ---
@@ -55,10 +72,15 @@ class EventUpdateView(generics.UpdateAPIView):
         return Event.objects.filter(admin=user)
 
     def update(self, request, *args, **kwargs):
-        partial = True  # <--- allow partial updates
+        partial = True
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
+
+        # Only superusers can change admin
+        if "admin" in serializer.validated_data and not request.user.is_superuser:
+            serializer.validated_data.pop("admin")
+
         self.perform_update(serializer)
         return Response(serializer.data)
 
@@ -90,13 +112,17 @@ class AddParticipantView(generics.UpdateAPIView):
         try:
             event = Event.objects.get(pk=pk)
         except Event.DoesNotExist:
-            return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         user = request.user
         event.participants.add(user)
         event.save()
 
-        return Response({"message": "Registered successfully"}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Registered successfully"}, status=status.HTTP_200_OK
+        )
 
 
 # --- Get Active Events (currently running) ---
@@ -141,7 +167,8 @@ class UserEventsView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return user.events_participated.all()
-    
+
+
 # --- Check if current user participates in event ---
 class CheckParticipationView(APIView):
     authentication_classes = [CookieJWTAuthentication]
@@ -161,3 +188,25 @@ class CheckParticipationView(APIView):
 
         is_participating = event.participants.filter(id=user.id).exists()
         return Response({"is_participating": is_participating})
+
+
+class EventParticipantsView(generics.ListAPIView):
+    """
+    GET /events/<pk>/participants/
+    Returns a list of all participants of a given event
+    """
+
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
+            return Response(
+                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        participants = event.participants.all()
+        serializer = UserSerializer(participants, many=True)
+        return Response(serializer.data)
