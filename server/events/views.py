@@ -25,8 +25,6 @@ class EventCreateView(generics.CreateAPIView):
 # --- List Events ---
 class EventListView(generics.ListAPIView):
     serializer_class = EventSerializer
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Event.objects.all()
@@ -128,8 +126,6 @@ class AddParticipantView(generics.UpdateAPIView):
 # --- Get Active Events (currently running) ---
 class ActiveEventsView(generics.ListAPIView):
     serializer_class = EventSerializer
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         now = timezone.now()
@@ -139,8 +135,6 @@ class ActiveEventsView(generics.ListAPIView):
 # --- Get Finished Events ---
 class FinishedEventsView(generics.ListAPIView):
     serializer_class = EventSerializer
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         now = timezone.now()
@@ -150,8 +144,6 @@ class FinishedEventsView(generics.ListAPIView):
 # --- Get Scheduled Events (upcoming, not started yet) ---
 class ScheduledEventsView(generics.ListAPIView):
     serializer_class = EventSerializer
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         now = timezone.now()
