@@ -195,6 +195,7 @@ class MyServiceRequestUpdateView(generics.UpdateAPIView):
             status__in=[
                 "PENDING",
                 "APPROVED",
+                "IN_PROGRESS"
             ],  # Only allow updates for certain statuses
         )
 

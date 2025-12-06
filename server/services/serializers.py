@@ -2,43 +2,46 @@ from rest_framework import serializers
 from .models import Service, Availability, ServiceRequest
 from django.contrib.auth.models import User
 
+
 # ------------------ User ------------------
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email']
+        fields = ["id", "username", "first_name", "last_name", "email"]
+
 
 # ------------------ Availability ------------------
 class AvailabilitySerializer(serializers.ModelSerializer):
-    day_of_week_display = serializers.CharField(source='get_day_of_week_display', read_only=True)
-    
+    day_of_week_display = serializers.CharField(
+        source="get_day_of_week_display", read_only=True
+    )
+
     class Meta:
         model = Availability
-        fields = ['id', 'day_of_week', 'day_of_week_display', 'start_time', 'end_time']
+        fields = ["id", "day_of_week", "day_of_week_display", "start_time", "end_time"]
+
 
 class AvailabilityNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Availability
-        fields = ['day_of_week', 'start_time', 'end_time']
+        fields = ["day_of_week", "start_time", "end_time"]
 
     def validate(self, data):
-        if data['start_time'] >= data['end_time']:
+        if data["start_time"] >= data["end_time"]:
             raise serializers.ValidationError("End time must be after start time")
         return data
+
 
 # ------------------ Service ------------------
 class ServiceSerializer(serializers.ModelSerializer):
     availability_slots = AvailabilitySerializer(many=True, read_only=True)
     availability_slots_write = AvailabilityNestedSerializer(
-        many=True, write_only=True, required=False, source='availability_slots'
+        many=True, write_only=True, required=False, source="availability_slots"
     )
 
     admin = UserSerializer(read_only=True)
     admin_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        source='admin',
-        write_only=True,
-        required=False
+        queryset=User.objects.all(), source="admin", write_only=True, required=False
     )
 
     available_plans = serializers.SerializerMethodField()
@@ -47,12 +50,22 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = [
-            'id', 'name', 'description', 'long_description', 'media',
-            'cost_discount', 'admin', 'admin_id', 'created_at', 'updated_at',
-            'availability_slots', 'availability_slots_write',
-            'available_plans', 'plan_names',
+            "id",
+            "name",
+            "description",
+            "long_description",
+            "media",
+            "cost_discount",
+            "admin",
+            "admin_id",
+            "created_at",
+            "updated_at",
+            "availability_slots",
+            "availability_slots_write",
+            "available_plans",
+            "plan_names",
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ["created_at", "updated_at"]
 
     def get_available_plans(self, obj):
         return obj.get_available_plans()
@@ -61,14 +74,14 @@ class ServiceSerializer(serializers.ModelSerializer):
         return obj.get_plan_names()
 
     def create(self, validated_data):
-        availability_data = validated_data.pop('availability_slots', [])
-        user = self.context['request'].user
+        availability_data = validated_data.pop("availability_slots", [])
+        user = self.context["request"].user
 
         # Superadmin can set/change admin
-        if not getattr(user, 'is_superadmin', False) and not user.is_superuser:
-            validated_data['admin'] = user
+        if not getattr(user, "is_superadmin", False) and not user.is_superuser:
+            validated_data["admin"] = user
         else:
-            validated_data['admin'] = validated_data.get('admin', user)
+            validated_data["admin"] = validated_data.get("admin", user)
 
         service = Service.objects.create(**validated_data)
 
@@ -81,12 +94,12 @@ class ServiceSerializer(serializers.ModelSerializer):
         return service
 
     def update(self, instance, validated_data):
-        availability_data = validated_data.pop('availability_slots', None)
-        user = self.context['request'].user
+        availability_data = validated_data.pop("availability_slots", None)
+        user = self.context["request"].user
 
         # Normal admins cannot change admin
-        if not getattr(user, 'is_superadmin', False) and not user.is_superuser:
-            validated_data.pop('admin', None)
+        if not getattr(user, "is_superadmin", False) and not user.is_superuser:
+            validated_data.pop("admin", None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -101,48 +114,54 @@ class ServiceSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 # ------------------ ServiceRequest ------------------
 class ServiceRequestCreateSerializer(serializers.ModelSerializer):
     service_id = serializers.PrimaryKeyRelatedField(
-        queryset=Service.objects.all(),
-        source='service',
-        write_only=True
+        queryset=Service.objects.all(), source="service", write_only=True
     )
 
     class Meta:
         model = ServiceRequest
-        fields = ['service_id', 'plan', 'request_msg', 'media_url']
+        fields = ["service_id", "plan", "request_msg", "media_url"]
 
     def validate_plan(self, value):
         if not isinstance(value, dict):
             raise serializers.ValidationError("Plan must be a dictionary")
-        if 'plan' not in value or 'cost' not in value:
+        if "plan" not in value or "cost" not in value:
             raise serializers.ValidationError("Plan must contain 'plan' and 'cost'")
-        cost = value.get('cost', 0)
-        discount = value.get('discount', 0)
+        cost = value.get("cost", 0)
+        discount = value.get("discount", 0)
         if cost < 0 or discount < 0 or discount > cost:
             raise serializers.ValidationError("Invalid cost or discount")
         return value
 
     def validate_request_msg(self, value):
-        if not isinstance(value, dict) or 'subject' not in value or 'body' not in value:
-            raise serializers.ValidationError("Request message must have 'subject' and 'body'")
+        if not isinstance(value, dict) or "subject" not in value or "body" not in value:
+            raise serializers.ValidationError(
+                "Request message must have 'subject' and 'body'"
+            )
         return value
 
     def validate(self, data):
-        service = data.get('service')
-        plan_name = data.get('plan', {}).get('plan')
+        service = data.get("service")
+        plan_name = data.get("plan", {}).get("plan")
         if service and plan_name:
-            available_plans = [plan.get('plan') for plan in service.cost_discount if 'plan' in plan]
+            available_plans = [
+                plan.get("plan") for plan in service.cost_discount if "plan" in plan
+            ]
             if plan_name not in available_plans:
-                raise serializers.ValidationError({
-                    'plan': f"Plan '{plan_name}' not available. Options: {', '.join(available_plans)}"
-                })
+                raise serializers.ValidationError(
+                    {
+                        "plan": f"Plan '{plan_name}' not available. Options: {', '.join(available_plans)}"
+                    }
+                )
         return data
 
     def create(self, validated_data):
-        validated_data['requested_by'] = self.context['request'].user
+        validated_data["requested_by"] = self.context["request"].user
         return super().create(validated_data)
+
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     requested_by = UserSerializer(read_only=True)
@@ -154,11 +173,21 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
         fields = [
-            'id', 'requested_by', 'service', 'plan', 'status',
-            'request_msg', 'media_url', 'remark', 'requested_at', 
-            'updated_at', 'final_price', 'plan_name', 'can_be_cancelled'
+            "id",
+            "requested_by",
+            "service",
+            "plan",
+            "status",
+            "request_msg",
+            "media_url",
+            "remark",
+            "requested_at",
+            "updated_at",
+            "final_price",
+            "plan_name",
+            "can_be_cancelled",
         ]
-        read_only_fields = ['status', 'remark', 'requested_by']
+        read_only_fields = ["status", "remark", "requested_by"]
 
     def get_final_price(self, obj):
         return obj.get_final_price()
@@ -169,37 +198,60 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     def get_can_be_cancelled(self, obj):
         return obj.can_be_cancelled()
 
+
 class ServiceRequestUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
-        fields = ['request_msg', 'media_url']
+        fields = ["request_msg", "media_url", "remark"]
 
     def validate_request_msg(self, value):
-        if not isinstance(value, dict) or 'subject' not in value or 'body' not in value:
-            raise serializers.ValidationError("Request message must have 'subject' and 'body'")
+        if not isinstance(value, dict) or "subject" not in value or "body" not in value:
+            raise serializers.ValidationError(
+                "Request message must have 'subject' and 'body'"
+            )
         return value
 
+    def validate_remark(self, value):
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Remark must be a string")
+        return value
+
+
 class AdminServiceRequestUpdateSerializer(serializers.ModelSerializer):
-    current_status = serializers.CharField(source='status', read_only=True)
-    requested_by_info = UserSerializer(source='requested_by', read_only=True)
-    service_info = ServiceSerializer(source='service', read_only=True)
+    current_status = serializers.CharField(source="status", read_only=True)
+    requested_by_info = UserSerializer(source="requested_by", read_only=True)
+    service_info = ServiceSerializer(source="service", read_only=True)
 
     class Meta:
         model = ServiceRequest
         fields = [
-            'id', 'status', 'remark', 'current_status', 
-            'requested_by_info', 'service_info', 'requested_at', 'updated_at'
+            "id",
+            "status",
+            "remark",
+            "current_status",
+            "requested_by_info",
+            "service_info",
+            "requested_at",
+            "updated_at",
         ]
 
     def validate_status(self, value):
         instance = self.instance
-        if instance and instance.status in ['COMPLETED', 'CANCELLED'] and value != instance.status:
-            raise serializers.ValidationError(f"Cannot change status from {instance.status}")
+        if (
+            instance
+            and instance.status in ["COMPLETED", "CANCELLED"]
+            and value != instance.status
+        ):
+            raise serializers.ValidationError(
+                f"Cannot change status from {instance.status}"
+            )
         return value
+
 
 class AvailabilityCheckSerializer(serializers.Serializer):
     day_of_week = serializers.ChoiceField(choices=Availability.DAY_CHOICES)
     time = serializers.TimeField()
+
 
 class ServiceStatisticsSerializer(serializers.Serializer):
     total_requests = serializers.IntegerField()
@@ -207,13 +259,24 @@ class ServiceStatisticsSerializer(serializers.Serializer):
     completed_requests = serializers.IntegerField()
     popular_plans = serializers.ListField()
 
+
 class ServiceListSerializer(serializers.ModelSerializer):
     admin_name = serializers.SerializerMethodField()
     plan_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Service
-        fields = ['id', 'name', 'description', 'media', 'admin_name', 'plan_count', 'created_at', 'long_description', 'cost_discount']
+        fields = [
+            "id",
+            "name",
+            "description",
+            "media",
+            "admin_name",
+            "plan_count",
+            "created_at",
+            "long_description",
+            "cost_discount",
+        ]
 
     def get_admin_name(self, obj):
         return obj.admin.get_full_name() if obj.admin else ""
