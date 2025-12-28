@@ -181,10 +181,10 @@ class LoginView(APIView):
         response = Response({"message": "Login successful"})
         # Set HttpOnly cookies
         response.set_cookie(
-            "access_token", access_token, httponly=True, secure=False, samesite="Lax"
+            "access_token", access_token, httponly=True, secure=False, samesite="Lax",path="/"
         )
         response.set_cookie(
-            "refresh_token", str(refresh), httponly=True, secure=False, samesite="Lax"
+            "refresh_token", str(refresh), httponly=True, secure=False, samesite="Lax",path="/"
         )
         return response
 
@@ -425,6 +425,7 @@ class TokenRefreshView(APIView):
                 httponly=True,
                 secure=False,  # Change to True in production
                 samesite="Lax",
+                path="/"
             )
 
             response.set_cookie(
@@ -433,6 +434,7 @@ class TokenRefreshView(APIView):
                 httponly=True,
                 secure=False,  # Change to True in production
                 samesite="Lax",
+                path="/"
             )
 
             return response
