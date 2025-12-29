@@ -8,7 +8,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 import random, datetime
-from .auth import CookieJWTAuthentication
 from django.contrib.auth.hashers import make_password
 from utils.util import send_otp_email
 
@@ -150,6 +149,8 @@ class VerifyOTPView(APIView):
 
 # --- LOGIN (Email + Password, sets cookies) ---
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -161,13 +162,14 @@ class LoginView(APIView):
             )
 
         try:
-            user = User.objects.get(email=email)
+            user_obj = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+                {"error": "Invalid credentials"},
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        user = authenticate(username=user.username, password=password)
+        user = authenticate(username=user_obj.username, password=password)
         if user is None or not user.is_active:
             return Response(
                 {"error": "Invalid credentials or inactive account"},
@@ -175,27 +177,28 @@ class LoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        user.last_login = datetime.datetime.now()
-        user.save()
-        response = Response({"message": "Login successful"})
-        # Set HttpOnly cookies
-        response.set_cookie(
-            "access_token", access_token, httponly=True, secure=False, samesite="Lax",path="/"
+
+        return Response(
+            {
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),  # optional
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                },
+            },
+            status=status.HTTP_200_OK,
         )
-        response.set_cookie(
-            "refresh_token", str(refresh), httponly=True, secure=False, samesite="Lax",path="/"
-        )
-        return response
 
 
 # --- LOGOUT (Clears cookies) ---
 class LogoutView(APIView):
     def post(self, request):
-        response = Response({"message": "Logged out"})
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
-        return response
+        return Response({"message": "Logged out"})
+
 
 
 # --- REQUEST RESET OTP ---
@@ -299,19 +302,10 @@ class ResetPasswordView(APIView):
 
 # --- GET LOGGED IN USER INFO ---
 class UserDetailView(APIView):
-    authentication_classes = [
-        CookieJWTAuthentication
-    ]  # your custom cookie-based JWT auth
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):  # use GET (not POST)
-        user = request.user  # already populated from the cookie
-
-        if not user or not user.is_authenticated:
-            return Response(
-                {"error": "Authentication required"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+    def get(self, request):
+        user = request.user
 
         return Response(
             {
@@ -328,20 +322,16 @@ class UserDetailView(APIView):
             }
         )
 
-
 # --- UPDATE USER PROFILE ---
 class UpdateProfileView(APIView):
-    authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
         user = request.user
         data = request.data
 
-        # Fields that can be updated
         updatable_fields = ["first_name", "last_name", "email"]
 
-        # Validate email uniqueness if changing email
         new_email = data.get("email")
         if new_email and new_email != user.email:
             if User.objects.filter(email=new_email).exclude(id=user.id).exists():
@@ -350,98 +340,48 @@ class UpdateProfileView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Update fields
         for field in updatable_fields:
             if field in data:
                 setattr(user, field, data[field])
 
-        try:
-            user.save()
-            return Response(
-                {
-                    "message": "Profile updated successfully",
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "email": user.email,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "date_joined": user.date_joined,
-                        "is_staff": user.is_staff,
-                        "is_active": user.is_active,
-                        "is_superuser": user.is_superuser,
-                        "last_login": user.last_login,
-                    },
-                },
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response(
-                {"error": "Failed to update profile"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        user.save()
 
+        return Response(
+            {
+                "message": "Profile updated successfully",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                },
+            }
+        )
 
 # --- REFRESH TOKEN ---
 class TokenRefreshView(APIView):
-    """
-    This view is specifically designed to work with HttpOnly cookies.
-    It reads the refresh token from the request's cookies and, if valid,
-    returns a new access token as an HttpOnly cookie.
-    """
-
-    permission_classes = [AllowAny]  # No auth token is needed to refresh
+    permission_classes = [AllowAny]
 
     def post(self, request):
-        # 1. Get the refresh token from the HttpOnly cookie
-        refresh_token = request.COOKIES.get("refresh_token")
+        refresh_token = request.data.get("refresh_token")
 
         if not refresh_token:
             return Response(
-                {"error": "Refresh token not found in cookies."},
+                {"error": "Refresh token required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            # 2. Validate the refresh token and generate a new access token
             refresh = RefreshToken(refresh_token)
-            new_access_token = str(refresh.access_token)
-
-            # 3. (Highly Recommended) Implement Refresh Token Rotation
-            # This invalidates the old refresh token and issues a new one.
-            new_refresh_token = str(refresh)
-
-            # 4. Create a response object and set the new cookies
-            response = Response(
-                {"detail": "Access token refreshed successfully."},
+            return Response(
+                {
+                    "access_token": str(refresh.access_token),
+                },
                 status=status.HTTP_200_OK,
             )
-
-            # NOTE: For production, set secure=True to ensure cookies are only sent over HTTPS.
-            # SameSite='Lax' is a good default for security.
-            response.set_cookie(
-                key="access_token",
-                value=new_access_token,
-                httponly=True,
-                secure=False,  # Change to True in production
-                samesite="Lax",
-                path="/"
-            )
-
-            response.set_cookie(
-                key="refresh_token",
-                value=new_refresh_token,
-                httponly=True,
-                secure=False,  # Change to True in production
-                samesite="Lax",
-                path="/"
-            )
-
-            return response
-
-        except (TokenError, InvalidToken) as e:
-            # This will catch expired or malformed tokens
+        except (TokenError, InvalidToken):
             return Response(
-                {"error": "Invalid or expired refresh token."},
+                {"error": "Invalid or expired refresh token"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
