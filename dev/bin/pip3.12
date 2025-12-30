@@ -1,4 +1,4 @@
-#!/home/ragnar/Documents/NAVRobotec/25INS002/backend/dev/bin/python3
+#!/root/home/backend/dev/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
