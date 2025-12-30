@@ -10,6 +10,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 import random, datetime
 from django.contrib.auth.hashers import make_password
 from utils.util import send_otp_email
+from django.utils import timezone
 
 # For demo: In-memory OTP store → replace with Redis/DB in production
 otp_store = {}  # { "username": { "otp": "123456", "expires_at": datetime } }
@@ -177,7 +178,8 @@ class LoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
-
+        user.last_login = timezone.now()
+        user.save(update_fields=["last_login"])
         return Response(
             {
                 "access_token": str(refresh.access_token),
