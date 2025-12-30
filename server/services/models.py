@@ -6,6 +6,12 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 import datetime
 
+def append_remark(instance, sender: str, message: str):
+    timestamp = timezone.now().isoformat()
+    line = f"[{sender}|{timestamp}]: {message.strip()}\n"
+
+    instance.remark = (instance.remark or "") + line
+    instance.save(update_fields=["remark"])
 
 # This is the main model for the services you offer.
 class Service(models.Model):

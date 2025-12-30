@@ -5,7 +5,10 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from django.shortcuts import get_object_or_404
+import json
+from django.db import transaction
+from rest_framework.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.utils import timezone
 from .models import Service, Availability, ServiceRequest
@@ -289,6 +292,85 @@ class AdminServiceRequestUpdateView(generics.UpdateAPIView):
 # ===================================================================
 # 5. ADDITIONAL FEATURE VIEWS
 # ===================================================================
+def can_add_remark(user, service_request):
+    """
+    User can add remark if:
+    - they are the request owner
+    - OR they are admin of the service
+    - OR they are superadmin
+    """
+    if user == service_request.requested_by:
+        return True
+
+    if (
+        getattr(user, "is_superadmin", False)
+        or user.is_superuser
+        or service_request.service.admin == user
+    ):
+        return True
+
+    return False
+
+
+@api_view(["POST"])
+@authentication_classes([CookieJWTAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def append_service_request_remark(request, pk):
+    """
+    Append a remark to a service request.
+    Works for BOTH admin and user.
+    """
+    with transaction.atomic():
+        service_request = get_object_or_404(ServiceRequest, pk=pk)
+
+        # Permission check
+        if not can_add_remark(request.user, service_request):
+            return Response(
+                {"error": "You do not have permission to add a remark to this request."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        message = request.data.get("message", "").strip()
+
+        if not message:
+            return Response(
+                {"error": "Message cannot be empty."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(message) > 2000:
+            return Response(
+                {"error": "Message too long (max 2000 characters)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Build structured remark entry
+        remark_entry = {
+            "by": "admin" if (
+                getattr(request.user, "is_superadmin", False)
+                or request.user.is_superuser
+                or service_request.service.admin == request.user
+            ) else "user",
+            "user_id": request.user.id,
+            "username": request.user.username,
+            "message": message,
+            "timestamp": timezone.now().isoformat(),
+        }
+
+        # Append safely
+        if service_request.remark:
+            service_request.remark += "\n" + json.dumps(remark_entry)
+        else:
+            service_request.remark = json.dumps(remark_entry)
+
+        service_request.save(update_fields=["remark"])
+
+        return Response(
+            {
+                "message": "Remark added successfully.",
+                "remark": remark_entry,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 # Check service availability

@@ -25,7 +25,8 @@ urlpatterns = [
     path('requests/my-requests/<int:pk>/update/', views.MyServiceRequestUpdateView.as_view(), name='my-request-update'),
     path('requests/my-requests/<int:pk>/cancel/', views.ServiceRequestCancelView.as_view(), name='request-cancel'),
     path('requests/my-statistics/', views.my_requests_statistics, name='my-requests-statistics'),
-    
+    path("requests/<int:pk>/remarks/", views.append_service_request_remark, name="append-service-request-remark"),
+
     # Admin URLs
     path('admin/requests/', views.AdminServiceRequestListView.as_view(), name='admin-requests'),
     path('admin/requests/<int:pk>/', views.AdminServiceRequestRetrieveView.as_view(), name='admin-request-detail'),

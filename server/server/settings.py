@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "events",
     "feedback",
     "services",
+    "query",
 ]
 
 # Auth settings
