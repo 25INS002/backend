@@ -30,6 +30,7 @@ urlpatterns = [
     path("api/events/", include("events.urls")),  # events endpoints
     path("api/feedback/", include("feedback.urls")),  # feedback endpoints
     path("api/services/", include("services.urls")),  # services endpoints
+    path("api/query/", include("query.urls")),  # services endpoints
 ]
 
 if settings.DEBUG:
