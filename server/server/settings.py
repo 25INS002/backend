@@ -106,7 +106,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://72.60.102.111:4000",
     "http://72.60.102.111:4001",
     "https://portal-979x.vercel.app",
-    "https://i2edc-api.navrobotec.online"
+    "https://i2edc.navrobotec.online"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:4000",
@@ -115,7 +115,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://72.60.102.111:4000",
     "http://72.60.102.111:4001",
     "https://portal-979x.vercel.app",
-    "https://i2edc-api.navrobotec.online"
+    "https://i2edc.navrobotec.online"
 ]
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = False  # required if using HTTPS
