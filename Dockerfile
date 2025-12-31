@@ -22,7 +22,7 @@ COPY server/ ./server/
 WORKDIR /app/server
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8010
 
 # Copy entrypoint script
 COPY entrypoint.sh /app/server/entrypoint.sh
