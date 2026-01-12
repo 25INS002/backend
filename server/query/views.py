@@ -17,9 +17,27 @@ class ContactMessageCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         request = self.request
-        serializer.save(
+        instance = serializer.save(
             ip_address=request.META.get("REMOTE_ADDR"),
             user_agent=request.META.get("HTTP_USER_AGENT", "")
+        )
+        
+        # Notify Admin
+        from utils.util import send_notification_email
+        from django.conf import settings
+        
+        # Send to default system email or a specific admin email
+        admin_email = getattr(settings, "DEFAULT_FROM_EMAIL", "admin@i2edc.org")
+        
+        send_notification_email(
+            recipient_email=admin_email,
+            template_type="contact_form",
+            context={
+                "name": instance.name,
+                "email": instance.email,
+                "subject": instance.subject,
+                "message": instance.message,
+            }
         )
 
 class ContactMessageAdminUpdateView(generics.RetrieveUpdateAPIView):

@@ -116,7 +116,33 @@ class AddParticipantView(generics.UpdateAPIView):
 
         user = request.user
         event.participants.add(user)
+        event.participants.add(user)
         event.save()
+        
+        # Send confirmation email
+        from utils.util import send_notification_email
+        if user.email:
+            send_notification_email(
+                recipient_email=user.email,
+                template_type="event_registration",
+                context={
+                    "event_name": event.name,
+                    "event_date": event.date.strftime("%d %B %Y, %H:%M") if event.date else "TBD",
+                }
+            )
+
+        # Notify Event Admin
+        event_admin = event.admin
+        if event_admin and event_admin.email:
+            send_notification_email(
+                recipient_email=event_admin.email,
+                template_type="event_registration_admin",
+                context={
+                    "event_name": event.name,
+                    "user_name": user.username,
+                    "user_email": user.email,
+                }
+            )
 
         return Response(
             {"message": "Registered successfully"}, status=status.HTTP_200_OK

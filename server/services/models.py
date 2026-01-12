@@ -232,17 +232,55 @@ def handle_service_request_status(sender, instance, created, **kwargs):
     """
     Automatically handle status changes and send notifications
     """
-    if created:
-        # Send notification to service admin about new request
-        # You can integrate with Django's messaging framework or send emails here
-        print(f"New service request created: {instance}")
-        # Example: send_mail_to_admin(instance)
+    from utils.util import send_notification_email  # Local import to avoid circular dependency
 
-    # Add any other automated workflows here
-    # For example, if status changed to approved, send confirmation to user
-    if not created:
-        print(f"Service request updated: {instance} - New status: {instance.status}")
-        # Example: notify_user_about_status_change(instance)
+    if created:
+        print(f"[DEBUG] New ServiceRequest created: {instance.id}")
+        # 1. Notify Service Admin
+        service_admin = instance.service.admin
+        if service_admin and service_admin.email:
+            print(f"[DEBUG] Sending email to Admin: {service_admin.email}")
+            send_notification_email(
+                recipient_email=service_admin.email,
+                template_type="service_request_admin",
+                context={
+                    "service_name": instance.service.name,
+                    "user_name": instance.requested_by.username,
+                    "plan_name": instance.get_plan_name(),
+                    "requested_at": instance.requested_at.strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+        else:
+            print("[DEBUG] No Admin email found.")
+            
+        # 2. Notify Requesting User (Confirmation)
+        user = instance.requested_by
+        if user and user.email:
+            print(f"[DEBUG] Sending confirmation to User: {user.email}")
+            send_notification_email(
+                recipient_email=user.email,
+                template_type="service_request_user_confirmation",
+                context={
+                    "service_name": instance.service.name,
+                    "user_name": user.username,
+                }
+            )
+        else:
+            print(f"[DEBUG] No User email found for user: {user.username}")
+
+    else:
+        # 2. Notify User of Status Change
+        user = instance.requested_by
+        if user and user.email:
+             # Only send if meaningful status change
+            send_notification_email(
+                recipient_email=user.email,
+                template_type="service_request_status",
+                context={
+                    "service_name": instance.service.name,
+                    "status": instance.status,
+                }
+            )
 
 
 # Optional: Additional helper functions

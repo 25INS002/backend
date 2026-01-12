@@ -364,6 +364,48 @@ def append_service_request_remark(request, pk):
 
         service_request.save(update_fields=["remark"])
 
+        # --- Send Email Notifications (Chat) ---
+        from utils.util import send_notification_email  # Local import
+        
+        # Helper to send correct template
+        def send_remark_email(target_user, is_sender_of_msg):
+            if not target_user or not target_user.email:
+                return
+                
+            if is_sender_of_msg:
+                # To Self (Confirmation)
+                send_notification_email(
+                    recipient_email=target_user.email,
+                    template_type="service_remark_sender",
+                    context={
+                        "service_name": service_request.service.name,
+                        "message": message,
+                    }
+                )
+            else:
+                # To Other (Notification)
+                send_notification_email(
+                    recipient_email=target_user.email,
+                    template_type="service_remark_recipient",
+                    context={
+                        "service_name": service_request.service.name,
+                        "sender_name": request.user.username, # The one who triggered this view
+                        "message": message,
+                    }
+                )
+
+        # 1. Handle Admin Email
+        service_admin = service_request.service.admin
+        # Check if Admin is the one sending the message
+        is_admin_sender = (request.user == service_admin)
+        send_remark_email(service_admin, is_admin_sender)
+
+        # 2. Handle User Email
+        requesting_user = service_request.requested_by
+        # Check if User is the one sending the message
+        is_user_sender = (request.user == requesting_user)
+        send_remark_email(requesting_user, is_user_sender)
+
         return Response(
             {
                 "message": "Remark added successfully.",
