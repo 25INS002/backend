@@ -100,6 +100,7 @@ MIDDLEWARE = [
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:4000",
     "http://localhost:4000",
     "http://10.10.120.78:4000",
     "http://127.0.0.1:4000",
@@ -110,6 +111,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://147.93.98.89:4000"
 ]
 CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:4000",
     "http://localhost:4000",
     "http://10.10.120.78:4000",
     "http://127.0.0.1:4000",
