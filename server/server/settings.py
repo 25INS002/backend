@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "feedback",
     "services",
     "query",
+    "content_app",
 ]
 
 # Auth settings

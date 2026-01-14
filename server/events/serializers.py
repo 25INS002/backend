@@ -22,8 +22,10 @@ class EventSerializer(serializers.ModelSerializer):
             "participants_usernames",
             "admin",
             "reg_end_date",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ["id", "participants_usernames"]
+        read_only_fields = ["id", "participants_usernames", "created_at", "updated_at"]
 
     def get_participants_usernames(self, obj):
         return [user.username for user in obj.participants.all()]

@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/feedback/", include("feedback.urls")),  # feedback endpoints
     path("api/services/", include("services.urls")),  # services endpoints
     path("api/query/", include("query.urls")),  # services endpoints
+    path("api/content/", include("content_app.urls")),  # content editor endpoints
 ]
 
 if settings.DEBUG:
