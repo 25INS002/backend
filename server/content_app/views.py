@@ -9,12 +9,8 @@ from django.conf import settings
 from media_app.auth import CookieJWTAuthentication
 
 
-# Path to the frontend public/content directory
-# Adjust this path based on your project structure
-CONTENT_BASE_PATH = os.path.join(
-    settings.BASE_DIR.parent.parent,  # Go up from server/ to portal/
-    'public', 'content'
-)
+# Path to the backend content directory
+CONTENT_BASE_PATH = os.path.join(settings.BASE_DIR, 'content')
 
 # Define the content categories and their files
 CONTENT_STRUCTURE = {
