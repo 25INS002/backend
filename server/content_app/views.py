@@ -31,8 +31,6 @@ CONTENT_STRUCTURE = {
 
 class ContentListView(APIView):
     """List all content categories and their files"""
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
     
     def get(self, request):
         result = []
@@ -62,8 +60,6 @@ class ContentListView(APIView):
 
 class ContentReadView(APIView):
     """Read a specific JSON content file"""
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
     
     def get(self, request):
         category = request.query_params.get('category')
