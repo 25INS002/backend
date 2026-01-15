@@ -3,7 +3,7 @@ FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
-COPY content/ /app/data-init/content/
+COPY server/content/ /app/data-init/content/
 # Copy only requirements first (for caching)
 COPY requirements.txt ./requirements.txt
 
