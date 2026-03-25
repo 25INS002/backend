@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "services",
     "query",
     "content_app",
+    "piga",
 ]
 
 # Auth settings

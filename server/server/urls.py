@@ -32,6 +32,7 @@ urlpatterns = [
     path("api/services/", include("services.urls")),  # services endpoints
     path("api/query/", include("query.urls")),  # services endpoints
     path("api/content/", include("content_app.urls")),  # content editor endpoints
+    path("api/piga/", include("piga.urls")),  # PIGA application endpoints
 ]
 
 if settings.DEBUG:

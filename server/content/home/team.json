@@ -1,15 +1,19 @@
 {
-    "core_members": [
+    "faculty": [
         {
             "name": "Dr Arvindd",
             "role": "CIO, I2EDC",
-            "image": "http://127.0.0.1:8000/media/uploads/front-facing-view-of-a-house-looking-from-the-street-austockphoto-000134929.webp"
+            "image": "http://127.0.0.1:8000/media/uploads/front-facing-view-of-a-house-looking-from-the-street-austockphoto-000134929.webp",
+            "click_here": "https://www.iitjammu.ac.in/post/m-t-arvind-chief-innovation-officer"
         },
         {
             "name": "Dr Navneet Kumar",
             "role": "PIC, I2EDC",
-            "image": "http://72.60.102.111:8000/media/uploads/dr-navneet.jpeg"
-        },
+            "image": "http://72.60.102.111:8000/media/uploads/dr-navneet.jpeg",
+            "click_here": "https://www.iitjammu.ac.in/faculty/~navneetkumar"
+        }
+    ],
+    "staff": [
         {
             "name": "Mohammad Israil",
             "role": "OIC, ProtoSpace",
