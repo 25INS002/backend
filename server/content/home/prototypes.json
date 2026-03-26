@@ -1,19 +1,119 @@
 {
-  "prototypes": [
-    {
-      "title": "Inflatable Wound Shield",
-      "description": "A self-inflating wound-protective device that shields injured or sutured skin from external impact while maintaining a sterile healing environment.",
-      "category": "Healthcare & Medical Devices"
-    },
-    {
-      "title": "Smart Helmet Strap System",
-      "description": "An intelligent emergency-responsive helmet strap that automatically tightens during an accident to enhance rider safety.",
-      "category": "Safety & IoT"
-    },
-    {
-      "title": "Foot Drop Assistive Device",
-      "description": "A shoe-mounted assistive mechanism that helps individuals with impaired dorsiflexion walk more naturally by restoring foot lift during gait.",
-      "category": "Rehabilitation & Assistive Technology"
-    }
-  ]
+    "prototypes": [
+        {
+            "title": "Compact Asthma Spacer",
+            "description": "A spacer for a metered-dose inhaler improves medication delivery by slowing and redirecting the spray inside a chamber. It mixes the medicine with air so smaller droplets reach the lungs more effectively and comfortably.",
+            "category": ""
+        },
+        {
+            "title": "Larvae Extracter",
+            "description": "A portable device removes myiasis larvae by first applying a safe gas to surface them, then using suction to extract them. It combines chemical treatment and vacuum in a single, self-contained tool for easy use.",
+            "category": ""
+        },
+        {
+            "title": "Assistive CPR Device",
+            "description": "A portable manual chest compression device helps deliver effective CPR using a handle-driven mechanism that applies controlled pressure to the chest. Built-in sensors provide real-time feedback on compression quality, making it easier and safer to perform life-saving resuscitation.",
+            "category": ""
+        },
+        {
+            "title": "Training Fire Extinguisher",
+            "description": "A water-based fire extinguisher training simulator mimics the weight, pressure, and spray time of a real extinguisher using safe water. It allows users to practice realistic fire-fighting actions with automatic timing and visual feedback, making training safe and effective.",
+            "category": ""
+        },
+        {
+            "title": "Impedance Based Pacing Adjustor",
+            "description": "An implantable pacing control module monitors lead–heart contact and pacing effectiveness in real time. If a heartbeat is missed, it automatically adjusts pacing energy to restore reliable heart stimulation while saving battery life.",
+            "category": ""
+        },
+        {
+            "title": "Foot Drop Assistive Device",
+            "description": "A shoe-mounted assistive device helps people with foot drop by gently lifting the front of the foot during walking. It stays inactive when the foot is on the ground, then applies controlled tension during the swing phase to improve toe clearance. This low-profile design supports a more natural and safer walking pattern.",
+            "category": ""
+        },
+        {
+            "title": "Smart Helmet Strap System",
+            "description": "An emergency helmet strap system automatically tightens on impact to keep the helmet securely in place. It uses stored energy for instant activation and can be manually reset for reuse.",
+            "category": ""
+        },
+        {
+            "title": "Toothbrush Sterlizer",
+            "description": "A toothbrush sterilization device uses a fine disinfecting mist to clean the bristles inside a small chamber. An IR sensor automatically activates the mist when a toothbrush is inserted, ensuring hygienic and easy sterilization.",
+            "category": ""
+        },
+        {
+            "title": "Inflatable Wound Shield",
+            "description": "A wound-protective device sticks around an injury and creates a raised, non-contact shield over the wound. When activated, it inflates into a soft dome that absorbs impacts and protects the area while healing.",
+            "category": ""
+        },
+        {
+            "title": "Volume-Controlled Oxygen Air-Blender For Neonatal CPAP",
+            "description": "A compact gas blender delivers a precise mix of oxygen and air for neonatal CPAP therapy. It continuously adjusts flow to provide the target oxygen level safely without high-pressure equipment.",
+            "category": ""
+        },
+        {
+            "title": "Braille Display",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Crepe Bandage Applicator",
+            "description": "A user-friendly device designed to simplify the application of crepe bandages. It ensures uniform pressure and reduces manual effort, especially useful in emergency or clinical settings.",
+            "category": ""
+        },
+        {
+            "title": "Fluid Flex Sensor",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Multi Drug Injector",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Self Lubricating Tampon",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Ankle Joint",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Self Wrapping Pad",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Vibration Damping Gloves",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Automatic Eyeglass Cleaner",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Breathable Cast Maker",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Knee Brace",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Toilet Swipe",
+            "description": "",
+            "category": ""
+        },
+        {
+            "title": "Steam Operated Boil-Over Inhibitor",
+            "description": "",
+            "category": ""
+        }
+    ]
 }

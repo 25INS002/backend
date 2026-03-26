@@ -1,0 +1,7 @@
+server/data
+server/media
+server/content
+__pycache__
+*.pyc
+.git
+.env

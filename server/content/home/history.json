@@ -1,14 +1,19 @@
 {
     "timeline": [
         {
-            "year": "2020",
-            "event": "Launch of Protospace",
-            "description": "Opened our state-of-the-art prototyping facility"
-        },
-        {
-            "year": "2019",
+            "year": "2018",
             "event": "Founding of I2EDC",
             "description": "Established the innovation cell to foster student entrepreneurship"
+        },
+        {
+            "year": "2020",
+            "event": "I2EDC Established",
+            "description": ""
+        },
+        {
+            "year": "2022",
+            "event": "Established Tinkerer's Lab",
+            "description": ""
         },
         {
             "year": "2022",
@@ -24,6 +29,11 @@
             "year": "2024",
             "event": "National Collaboration",
             "description": "Partnered with institutes for nationwide innovation programs"
+        },
+        {
+            "year": "2025",
+            "event": "Established Protospace",
+            "description": ""
         }
     ]
 }

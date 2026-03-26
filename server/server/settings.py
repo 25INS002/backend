@@ -109,7 +109,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://72.60.102.111:4001",
     "https://portal-979x.vercel.app",
     "https://i2edc.navrobotec.online",
-    "http://147.93.98.89:4000"
+    "http://147.93.98.89:4000",
+    "http://10.10.11.61:4000",
+    "http://10.10.11.61",
+    "https://10.10.11.61:4000",
+    "https://i2edc.iitjammu.ac.in",
+    "https://10.10.11.61"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:4000",
@@ -120,7 +125,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://72.60.102.111:4001",
     "https://portal-979x.vercel.app",
     "https://i2edc.navrobotec.online",
-    "http://147.93.98.89:4000"
+    "http://147.93.98.89:4000",
+    "http://10.10.11.61:4000",
+    "http://10.10.11.61",
+    "https://10.10.11.61:4000",
+    "https://i2edc.iitjammu.ac.in",
+    "https://10.10.11.61"
 ]
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = False  # required if using HTTPS

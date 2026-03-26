@@ -1,21 +1,27 @@
 {
     "core_members": [
         {
-            "name": "Dr Navneet Kumar",
-            "club": "I2EDC",
-            "role": "PIC",
-            "image": "http://72.60.102.111:8000/media/uploads/dr-navneet.jpeg"
-        },
-        {
             "name": "Dr Arvind",
             "club": "I2EDC",
             "role": "CIO",
             "image": "http://72.60.102.111:8000/media/uploads/dr-mt-arvind.jpeg"
         },
         {
+            "name": "Dr Navneet Kumar",
+            "club": "I2EDC",
+            "role": "PIC",
+            "image": "http://72.60.102.111:8000/media/uploads/dr-navneet.jpeg"
+        },
+        {
             "name": "Mohammad Israil",
-            "club": "ProtoSpace",
+            "club": "",
             "role": "OIC",
+            "image": ""
+        },
+        {
+            "name": "Priyanka Manhas",
+            "club": "",
+            "role": "Outreach Officer",
             "image": ""
         },
         {
@@ -25,40 +31,34 @@
             "image": ""
         },
         {
+            "name": "Sahil Sharma",
+            "club": "Tinkering Lab",
+            "role": "Tinkering Lab, Technician",
+            "image": ""
+        },
+        {
             "name": "Drish Mahajan",
-            "club": "ProtoSpace",
+            "club": "Tinkering Lab",
             "role": "Manager",
             "image": "http://72.60.102.111:8000/media/uploads/Drish_TL_manager.jpg"
         },
         {
-            "name": "Mitul Kalivarapu",
-            "club": "ProtoSpace",
-            "role": "Co Manager",
-            "image": "http://72.60.102.111:8000/media/uploads/Mitul_TL_comanager.heic"
-        },
-        {
             "name": "Bhavishya",
-            "club": "Tinkering Lab",
+            "club": "ProtoSpace",
             "role": "Manager",
             "image": "http://72.60.102.111:8000/media/uploads/bhavishya.JPG"
         },
         {
-            "name": "Sparsh Dubey",
-            "club": "Tinkering Lab",
-            "role": "Co Manager",
-            "image": "http://72.60.102.111:8000/media/uploads/Sparsh_dubey__ps_comanager.jpg"
+            "name": "Ujjwal",
+            "club": "",
+            "role": "Creative Head",
+            "image": "http://72.60.102.111:8000/media/uploads/ujjwal.JPG"
         },
         {
-            "name": "Gaurav Tiwari",
-            "club": "E Cell",
-            "role": "President",
-            "image": "http://72.60.102.111:8000/media/uploads/Gaurav_Tiwari.jpg"
-        },
-        {
-            "name": "Owais Ansar",
-            "club": "E Cell",
-            "role": "Vice-President",
-            "image": "http://72.60.102.111:8000/media/uploads/owias-ecell.jpg"
+            "name": "Anjali Thorat",
+            "club": "",
+            "role": "Creative Head",
+            "image": "http://72.60.102.111:8000/media/uploads/2024pth0116-anjali_thorat.jpeg"
         },
         {
             "name": "Bhanu Prakash Mobarasa",
@@ -67,28 +67,40 @@
             "image": "http://72.60.102.111:8000/media/uploads/bhanu-bec.png"
         },
         {
-            "name": "Anjali Thorat",
-            "club": "Tech Team",
-            "role": "Head",
-            "image": "http://72.60.102.111:8000/media/uploads/2024pth0116-anjali_thorat.jpeg"
+            "name": "Gaurav Tiwari",
+            "club": "E Cell",
+            "role": "President",
+            "image": "http://72.60.102.111:8000/media/uploads/Gaurav_Tiwari.jpg"
         },
         {
-            "name": "Ujjwal",
-            "club": "Creative Team",
-            "role": "Head",
-            "image": "http://72.60.102.111:8000/media/uploads/ujjwal.JPG"
+            "name": "Mitul Kalivarapu",
+            "club": "Tinkering Lab",
+            "role": "Co Manager",
+            "image": "http://72.60.102.111:8000/media/uploads/Mitul_TL_comanager.heic"
+        },
+        {
+            "name": "Sparsh Dubey",
+            "club": "Protospace",
+            "role": "Co Manager",
+            "image": "http://72.60.102.111:8000/media/uploads/Sparsh_dubey__ps_comanager.jpg"
+        },
+        {
+            "name": "Owais Ansar",
+            "club": "E Cell",
+            "role": "Vice-President",
+            "image": "http://72.60.102.111:8000/media/uploads/owias-ecell.jpg"
+        },
+        {
+            "name": "Purva",
+            "club": "",
+            "role": "Student Head",
+            "image": "http://72.60.102.111:8000/media/uploads/purva.jpegq"
         },
         {
             "name": "Anmol Negi",
             "club": "Outreach Team",
-            "role": "Head",
+            "role": "Student Head",
             "image": "http://72.60.102.111:8000/media/uploads/anmol-outreach.jpeg"
-        },
-        {
-            "name": "Purva",
-            "club": "Outreach Team",
-            "role": "Head",
-            "image": "http://72.60.102.111:8000/media/uploads/purva.jpegq"
         }
     ],
     "ps_tl_members": [
@@ -147,7 +159,7 @@
             "image": "http://72.60.102.111:8000/media/uploads/sam_photo.jpeg"
         },
         {
-            "name": "Sujal",
+            "name": "Sujal Kapoor",
             "club": "Design, Content & Coverage",
             "role": "Member",
             "image": "http://72.60.102.111:8000/media/uploads/sujal.jpg"
@@ -212,13 +224,13 @@
             "role": "Member",
             "image": "http://72.60.102.111:8000/media/uploads/Smmayan_Anand.jpg"
         },
-         {
+        {
             "name": "Hojafia Najar Siddiqui",
             "club": "Inventory Team",
             "role": "Member",
             "image": "http://72.60.102.111:8000/media/uploads/Hozaifa_Nazar_Siddiqui__TL_member__.jpg"
         },
-         {
+        {
             "name": "Manish R Karande",
             "club": "Inventory Team",
             "role": "Member",
@@ -272,13 +284,13 @@
             "role": "Member",
             "image": ""
         },
-         {
+        {
             "name": "Daksha Gupta",
             "club": "Outreach Team",
             "role": "Member",
             "image": ""
         },
-         {
+        {
             "name": "ATM Aswatn",
             "club": "Outreach Team",
             "role": "Member",
@@ -346,9 +358,8 @@
             "role": "Member",
             "image": "http://72.60.102.111:8000/media/uploads/Devansh_Singh_.jpg"
         }
-
     ],
-    "bec_members" : [
+    "bec_members": [
         {
             "name": "Bhanu Prakash Mobarasa",
             "club": "BEC",
@@ -457,7 +468,5 @@
             "role": "Member",
             "image": ""
         }
-        
-
     ]
 }

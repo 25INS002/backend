@@ -1,76 +1,106 @@
 {
     "core_members": [
         {
-            "name": "Dr Arvindd",
-            "role": "CIO, I2EDC",
-            "image": "http://127.0.0.1:8000/media/uploads/front-facing-view-of-a-house-looking-from-the-street-austockphoto-000134929.webp"
+            "name": "Prof. MT Arvind",
+            "role": "CIO",
+            "image": "http://i2edc.navrobotec.com/media/uploads/arvind.png"
         },
         {
-            "name": "Dr Navneet Kumar",
-            "role": "PIC, I2EDC",
-            "image": "http://72.60.102.111:8000/media/uploads/dr-navneet.jpeg"
+            "name": "Prof. Navneet Kumar",
+            "role": "PIC",
+            "image": "http://i2edc.navrobotec.com/media/uploads/navneet.jpeg"
+        },
+        {
+            "name": "Prof. Ankit Dubey",
+            "role": "Committee Member",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/1641888845020.jpeg"
+        },
+        {
+            "name": "Prof. Yogesh M. Nimdeo",
+            "role": "Committee Member",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/1669361029600.png"
+        },
+        {
+            "name": "Prof. Nalin K Sharma",
+            "role": "Committee Member",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/1704698760688.jpeg"
         },
         {
             "name": "Mohammad Israil",
-            "role": "OIC, ProtoSpace",
-            "image": ""
+            "role": "OIC",
+            "image": "http://i2edc.navrobotec.com/media/uploads/Mohammad_ejAXzwL.png"
         },
         {
-            "name": "Drish Mahajan",
-            "role": "Manager, ProtoSpace",
-            "image": "http://72.60.102.111:8000/media/uploads/Drish_TL_manager.jpg"
+            "name": "Mrs. Priyanka Manhas",
+            "role": "Administrative and Outreach Incharge",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/20260223_171027-IMG_STYLE_QTWOpe9.jpg"
         },
         {
-            "name": "Bhavishya",
-            "role": "Manager, Tinkering Lab",
-            "image": "http://72.60.102.111:8000/media/uploads/bhavishya.JPG"
+            "name": " Mr.Namrit Bhardwaj",
+            "role": "Tinkering Lab, Incharge",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/WhatsApp_Image_2026-01-27_at_4.56.01_PM.jpeg"
         },
         {
-            "name": "Gaurav Tiwari",
-            "role": "President, E-Cell",
-            "image": "http://72.60.102.111:8000/media/uploads/Gaurav_Tiwari.jpg"
-        },
-        {
-            "name": "Bhanu Prakash Mobarasa",
-            "role": "President, BEC",
-            "image": "http://72.60.102.111:8000/media/uploads/bhanu-bec.png"
-        },
-        {
-            "name": "Ashutosh ",
-            "role": "Head ",
-            "image": "http://127.0.0.1:8000/media/uploads/logo-3d-card.png"
+            "name": "Sahil Sharma",
+            "role": "Tinkering Lab, Technician",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/WhatsApp_Image_2026-02-06_at_6.49.07_PM.jpeg"
         }
     ],
     "club_heads": [
         {
-            "name": "Anjali Thorat",
-            "role": "Head, Tech Team",
-            "image": "http://72.60.102.111:8000/media/uploads/2024pth0116-anjali_thorat.jpeg"
+            "name": " Drish Mahajan",
+            "role": "Manager, Tinkering Lab",
+            "image": "http://i2edc.navrobotec.com/media/uploads/drish.jpeg"
+        },
+        {
+            "name": "Bhavishya",
+            "role": "Manager, ProtoSpace",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/IMG-20260205-WA0025.jpg"
+        },
+        {
+            "name": " Gaurav Tiwari",
+            "role": "President, E-Cell",
+            "image": "http://i2edc.navrobotec.com/media/uploads/PHOTO-2026-02-05-20-14-33.jpg"
         },
         {
             "name": "Ujjwal",
-            "role": "Head, Creative Team",
-            "image": "http://72.60.102.111:8000/media/uploads/ujjwal.JPG"
+            "role": "Head, Creative ",
+            "image": "http://i2edc.navrobotec.com/media/uploads/DSC09649_-_UJJWAL_WtHFP4s.JPG"
+        },
+        {
+            "name": "Anjali Thorat",
+            "role": "Head, Creative ",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/IMG-20260205-WA0019.jpg"
+        },
+        {
+            "name": " Bhanu Prakash Mobarasa",
+            "role": "President, BEC",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/IMG-20260205-WA0020.jpg"
+        },
+        {
+            "name": "Mitul Kalivarapu",
+            "role": "Co- Manager, Tinkering Lab",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/294A3002.jpg"
+        },
+        {
+            "name": "Sparsh Dubey",
+            "role": "Co- Manager, Protospace",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/1000231829.jpg"
+        },
+        {
+            "name": "Owais Ansar",
+            "role": "Vice-President, E-Cell",
+            "image": ""
+        },
+        {
+            "name": "Purva",
+            "role": "Student Head, Outreach",
+            "image": "http://i2edc.navrobotec.com/media/uploads/IMG-20250718-WA0094_-_PURVA_0zwXW9v.jpg"
         },
         {
             "name": "Anmol Negi",
-            "role": "Head, Outreach Team",
-            "image": "http://72.60.102.111:8000/media/uploads/anmol-outreach.jpeg"
-        },
-        {
-            "name": "Priyanshi Agarwal",
-            "role": "Head, Design & Coverage",
-            "image": "http://72.60.102.111:8000/media/uploads/priyanshi_Agarwal.jpg"
-        },
-        {
-            "name": "Riyaz",
-            "role": "Head, Treasury (ProtoSpace)",
-            "image": "http://72.60.102.111:8000/media/uploads/riyaz-khan.jpg"
-        },
-        {
-            "name": "Aman Kumar",
-            "role": "Head, Training & Curriculum (Tinkering Lab)",
-            "image": "http://72.60.102.111:8000/media/uploads/Aman_Kumar__TL_head.JPG"
+            "role": "Student Head, Outreach",
+            "image": "http://i2edc.iitjammu.ac.in/media/uploads/IMG-20260205-WA0024_1rEaDPX.jpg"
         }
     ]
 }
