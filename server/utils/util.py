@@ -191,6 +191,94 @@ def send_notification_email(recipient_email, template_type, context=None):
         <p>Please log in to your dashboard to view the full conversation and reply.</p>
         """
 
+    # --- 7. PIGA: Admin - New Application ---
+    elif template_type == "piga_new_admin":
+        project_title = context.get("project_title", "Untitled Project")
+        applicant_name = context.get("applicant_name", "Unknown")
+        
+        subject = f"New PIGA Application: {project_title}"
+        intro = f"<strong>{applicant_name}</strong> has submitted a new PIGA application: <strong>{project_title}</strong>."
+        details_html = f"""
+        <div style="background:#f7f9ff; padding:15px; border-radius:6px; margin:20px 0;">
+            <p style="margin:5px 0;"><strong>Project:</strong> {project_title}</p>
+            <p style="margin:5px 0;"><strong>Applicant:</strong> {applicant_name}</p>
+            <p style="margin:5px 0;"><strong>Submitted:</strong> {context.get('submitted_at', 'Just now')}</p>
+        </div>
+        <p>Please log in to the admin panel to review this application.</p>
+        """
+
+    # --- 8. PIGA: User - Submission Confirmation ---
+    elif template_type == "piga_submitted_user":
+        project_title = context.get("project_title", "Your Project")
+        user_name = context.get("user_name", "User")
+        
+        subject = f"PIGA Application Received: {project_title}"
+        intro = f"Hi {user_name}, your PIGA application for <strong>{project_title}</strong> has been received!"
+        details_html = """
+        <p>Our team will review your application and get back to you shortly.</p>
+        <p>You can track the status of your application in your dashboard.</p>
+        """
+
+    # --- 9. PIGA: User - Status Update ---
+    elif template_type == "piga_status_update":
+        project_title = context.get("project_title", "Your Project")
+        piga_status = context.get("status", "Updated")
+        feedback = context.get("feedback", "")
+        
+        subject = f"PIGA Update: {project_title} — {piga_status}"
+        intro = f"The status of your PIGA application <strong>{project_title}</strong> has been updated."
+
+        status_color = "#333"
+        if "Approved" in piga_status: status_color = "#198754"
+        elif "Rejected" in piga_status: status_color = "#dc3545"
+        elif "Review" in piga_status: status_color = "#ffc107"
+        
+        feedback_html = ""
+        if feedback:
+            feedback_html = f"""
+            <div style="background:#fff3cd; padding:15px; border-radius:6px; margin:15px 0; border-left: 4px solid #ffc107;">
+                <p style="margin:0;"><strong>Feedback:</strong> {feedback}</p>
+            </div>
+            """
+        
+        details_html = f"""
+        <div style="text-align:center; margin:30px 0;">
+            <span style="font-size:20px; font-weight:bold; color:{status_color}; border:2px solid {status_color}; padding: 10px 20px; border-radius:50px;">
+                {piga_status}
+            </span>
+        </div>
+        {feedback_html}
+        <p>Check your dashboard for more details.</p>
+        """
+
+    # --- 10a. PIGA REMARK: To Sender ---
+    elif template_type == "piga_remark_sender":
+        project_title = context.get("project_title", "Project")
+        message_snippet = context.get("message", "")
+        
+        subject = f"Message Sent: {project_title}"
+        intro = f"You sent a new message regarding PIGA application <strong>{project_title}</strong>."
+        details_html = f"""
+        <div style="background:#eef2f5; padding:15px; border-radius:6px; margin:20px 0; border-left: 4px solid #6c757d;">
+            <p style="margin:0; font-style:italic;">"{message_snippet}"</p>
+        </div>
+        """
+
+    # --- 10b. PIGA REMARK: To Recipient ---
+    elif template_type == "piga_remark_recipient":
+        project_title = context.get("project_title", "Project")
+        sender_name = context.get("sender_name", "User")
+        message_snippet = context.get("message", "")
+        
+        subject = f"New Message: {project_title}"
+        intro = f"<strong>{sender_name}</strong> sent you a message regarding PIGA application <strong>{project_title}</strong>."
+        details_html = f"""
+        <div style="background:#eef2f5; padding:15px; border-radius:6px; margin:20px 0; border-left: 4px solid #6c757d;">
+            <p style="margin:0; font-style:italic;">"{message_snippet}"</p>
+        </div>
+        <p>Please log in to your dashboard to view the full conversation and reply.</p>
+        """
+
     # Construct HTML Body
     html_content = f"""
     <html>
