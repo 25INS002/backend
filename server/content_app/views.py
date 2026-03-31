@@ -16,7 +16,7 @@ CONTENT_BASE_PATH = os.path.join(settings.BASE_DIR, 'content')
 CONTENT_STRUCTURE = {
     'home': {
         'name': 'Home Page',
-        'files': ['team.json', 'hero.json', 'about.json', 'services.json', 'prototypes.json', 'history.json', 'meta.json']
+        'files': ['team.json', 'hero.json', 'about.json', 'services.json', 'prototypes.json', 'history.json', 'meta.json', 'programs.json']
     },
     'about': {
         'name': 'About Page',

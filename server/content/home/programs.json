@@ -1,0 +1,28 @@
+{
+    "programs": [
+        {
+            "id": 5,
+            "title": "Lab Access & Prototyping",
+            "image": "/media/programs/lab-access.webp",
+            "short_description": "Explore our innovation labs with state-of-the-art equipment.",
+            "description": "Get access to our fully equipped fabrication labs including 3D printers, laser cutters, CNC machines, and electronics workstations. Whether you're building a prototype for a competition or a startup MVP, our labs provide the tools and technical support you need to bring your ideas to life.",
+            "apply_url": "https://www.iitjammu.ac.in/faculty/~M.T%20Arvind"
+        },
+        {
+            "id": 6,
+            "title": "qwertyu",
+            "image": "http://localhost:8000/media/uploads/Screenshot_2026-03-19_181907.png",
+            "short_description": "sdfiy",
+            "description": "hjgcshdgckh",
+            "apply_url": "https://www.iitjammu.ac.in/faculty/~M.T%20Arvind"
+        },
+        {
+            "id": 7,
+            "title": "qwerhj",
+            "image": "http://localhost:8000/media/uploads/WhatsApp_Image_2026-03-28_at_1.03.38_PM.jpeg",
+            "short_description": "sdfghjk",
+            "description": "zzxdcfvgbhn",
+            "apply_url": ""
+        }
+    ]
+}
