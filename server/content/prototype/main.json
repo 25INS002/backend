@@ -158,9 +158,7 @@
                 ],
                 "github": null,
                 "demo": null,
-                "images": [
-                    "http://72.60.102.111:8000/media/uploads/helmat-strap.jpg"
-                ],
+                "images": "http://localhost:8000/media/uploads/Screenshot_from_2025-09-04_03-11-08.png",
                 "date": "2025-02-10"
             },
             {
@@ -182,9 +180,7 @@
                 ],
                 "github": null,
                 "demo": null,
-                "images": [
-                    "http://72.60.102.111:8000/media/uploads/CPR-assistance.pdf"
-                ],
+                "images": "https://imgs.search.brave.com/aPMY0iaqLDe0DT8vy_UL25Q3t4TVIY6D1abWQNK5dzs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAxLzAyLzYyLzgx/LzM2MF9GXzEwMjYy/ODE1NV9aUGlBYU5F/RFJTWlUyUzBMQWti/Y2d2d0x5TW1yOWMy/WS5qcGc",
                 "date": "2025-03-01"
             },
             {
@@ -242,11 +238,11 @@
                 "gradient": "from-yellow-500 to-orange-500"
             },
             {
-                "title": "Education & Training",
-                "description": "Interactive learning and training devices",
-                "icon": "🎓",
-                "count": "1 Project",
-                "gradient": "from-indigo-500 to-purple-500"
+                "title": "",
+                "description": "",
+                "icon": "",
+                "count": "",
+                "gradient": ""
             }
         ]
     },
