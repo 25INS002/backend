@@ -32,4 +32,9 @@ urlpatterns = [
     path('admin/requests/<int:pk>/', views.AdminServiceRequestRetrieveView.as_view(), name='admin-request-detail'),
     path('admin/requests/<int:pk>/update/', views.AdminServiceRequestUpdateView.as_view(), name='admin-request-update'),
     path('admin/my-services/', views.MyServicesListView.as_view(), name='my-services'),
+
+    # Payment URLs (Razorpay)
+    path('payment/create-order/', views.create_order, name='payment-create-order'),
+    path('payment/verify/', views.verify_payment, name='payment-verify'),
+    path('payment/webhook/', views.razorpay_webhook, name='payment-webhook'),
 ]

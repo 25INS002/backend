@@ -124,6 +124,7 @@ class Availability(models.Model):
 # This new model will store all user requests for a service.
 class ServiceRequest(models.Model):
     STATUS_CHOICES = [
+        ("AWAITING_PAYMENT", "Awaiting Payment"),
         ("PENDING", "Pending"),
         ("APPROVED", "Approved"),
         ("IN_QUEUE", "In Queue"),
@@ -226,6 +227,42 @@ class ServiceRequest(models.Model):
         super().save(*args, **kwargs)
 
 
+# ===================================================================
+# PAYMENT MODEL — Razorpay Integration
+# ===================================================================
+class Payment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ("CREATED", "Created"),
+        ("PAID", "Paid"),
+        ("FAILED", "Failed"),
+        ("REFUNDED", "Refunded"),
+    ]
+
+    service_request = models.OneToOneField(
+        ServiceRequest, on_delete=models.CASCADE, related_name="payment"
+    )
+    razorpay_order_id = models.CharField(max_length=100, unique=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=256, blank=True, null=True)
+    amount = models.PositiveIntegerField(help_text="Amount in paise (INR x 100)")
+    currency = models.CharField(max_length=10, default="INR")
+    status = models.CharField(
+        max_length=20, choices=PAYMENT_STATUS_CHOICES, default="CREATED"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["razorpay_order_id"]),
+            models.Index(fields=["status"]),
+        ]
+
+    def __str__(self):
+        return f"Payment {self.razorpay_order_id} - {self.status} - ₹{self.amount / 100:.2f}"
+
+
 # Signal handlers
 @receiver(post_save, sender=ServiceRequest)
 def handle_service_request_status(sender, instance, created, **kwargs):
@@ -235,6 +272,11 @@ def handle_service_request_status(sender, instance, created, **kwargs):
     from utils.util import send_notification_email  # Local import to avoid circular dependency
 
     if created:
+        # Skip email for AWAITING_PAYMENT status (payment not yet completed)
+        if instance.status == "AWAITING_PAYMENT":
+            print(f"[DEBUG] ServiceRequest {instance.id} awaiting payment, skipping email.")
+            return
+
         print(f"[DEBUG] New ServiceRequest created: {instance.id}")
         # 1. Notify Service Admin
         service_admin = instance.service.admin

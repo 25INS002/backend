@@ -614,3 +614,295 @@ class BulkAvailabilityUpdateView(generics.GenericAPIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ===================================================================
+# 7. RAZORPAY PAYMENT VIEWS
+# ===================================================================
+
+import hmac
+import hashlib
+from django.conf import settings as django_settings
+from django.views.decorators.csrf import csrf_exempt
+from .models import Payment
+from .serializers import (
+    CreateOrderSerializer,
+    VerifyPaymentSerializer,
+    PaymentSerializer,
+)
+
+
+def get_razorpay_client():
+    """Lazy initialization of Razorpay client — only called when payment views are hit."""
+    import razorpay  # Lazy import to avoid startup crash if pkg_resources is missing
+    key_id = django_settings.RAZORPAY_KEY_ID
+    key_secret = django_settings.RAZORPAY_KEY_SECRET
+    if not key_id or not key_secret:
+        raise Exception(
+            "Razorpay keys not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your .env file."
+        )
+    return razorpay.Client(auth=(key_id, key_secret))
+
+
+@api_view(["POST"])
+@authentication_classes([CookieJWTAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def create_order(request):
+    """
+    Create a Razorpay order and a ServiceRequest with AWAITING_PAYMENT status.
+    The amount is always calculated server-side from the service plan data.
+    """
+    serializer = CreateOrderSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    service_id = serializer.validated_data["service_id"]
+    plan_data = serializer.validated_data["plan"]
+    request_msg = serializer.validated_data["request_msg"]
+
+    service = get_object_or_404(Service, pk=service_id)
+
+    # Validate plan exists in service
+    plan_name = plan_data.get("plan")
+    matched_plan = None
+    for sp in service.cost_discount:
+        if sp.get("plan") == plan_name:
+            matched_plan = sp
+            break
+
+    if not matched_plan:
+        return Response(
+            {"error": f"Plan '{plan_name}' not found for this service."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Calculate amount SERVER-SIDE (never trust frontend amount)
+    cost = matched_plan.get("cost", 0)
+    discount = matched_plan.get("discount", 0)
+    final_price = cost - discount
+    amount_in_paise = int(final_price * 100)
+
+    if amount_in_paise <= 0:
+        return Response(
+            {"error": "Invalid amount. Final price must be greater than 0."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        with transaction.atomic():
+            # Create Razorpay order
+            client = get_razorpay_client()
+            razorpay_order = client.order.create(
+                {
+                    "amount": amount_in_paise,
+                    "currency": "INR",
+                    "notes": {
+                        "service_id": str(service.id),
+                        "service_name": service.name,
+                        "plan": plan_name,
+                        "user": request.user.username,
+                    },
+                }
+            )
+
+            # Create ServiceRequest with AWAITING_PAYMENT
+            service_request = ServiceRequest.objects.create(
+                requested_by=request.user,
+                service=service,
+                plan=matched_plan,
+                request_msg=request_msg,
+                status="AWAITING_PAYMENT",
+            )
+
+            # Create Payment record
+            payment = Payment.objects.create(
+                service_request=service_request,
+                razorpay_order_id=razorpay_order["id"],
+                amount=amount_in_paise,
+                currency="INR",
+                status="CREATED",
+            )
+
+            return Response(
+                {
+                    "order_id": razorpay_order["id"],
+                    "amount": amount_in_paise,
+                    "currency": "INR",
+                    "key_id": django_settings.RAZORPAY_KEY_ID,
+                    "service_request_id": service_request.id,
+                    "service_name": service.name,
+                    "plan_name": plan_name,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to create order: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@authentication_classes([CookieJWTAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def verify_payment(request):
+    """
+    Verify Razorpay payment signature and finalize the ServiceRequest.
+    Uses HMAC SHA256 to verify the signature is authentic.
+    """
+    serializer = VerifyPaymentSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    razorpay_order_id = serializer.validated_data["razorpay_order_id"]
+    razorpay_payment_id = serializer.validated_data["razorpay_payment_id"]
+    razorpay_signature = serializer.validated_data["razorpay_signature"]
+
+    try:
+        payment = Payment.objects.select_related("service_request").get(
+            razorpay_order_id=razorpay_order_id
+        )
+    except Payment.DoesNotExist:
+        return Response(
+            {"error": "Payment record not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Ensure the payment belongs to the requesting user
+    if payment.service_request.requested_by != request.user:
+        return Response(
+            {"error": "Unauthorized."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    # Already paid
+    if payment.status == "PAID":
+        return Response(
+            {"message": "Payment already verified.", "status": "success"},
+            status=status.HTTP_200_OK,
+        )
+
+    try:
+        # Verify signature using Razorpay SDK
+        client = get_razorpay_client()
+        client.utility.verify_payment_signature(
+            {
+                "razorpay_order_id": razorpay_order_id,
+                "razorpay_payment_id": razorpay_payment_id,
+                "razorpay_signature": razorpay_signature,
+            }
+        )
+
+        # Signature valid — mark as paid
+        with transaction.atomic():
+            payment.razorpay_payment_id = razorpay_payment_id
+            payment.razorpay_signature = razorpay_signature
+            payment.status = "PAID"
+            payment.save()
+
+            payment.service_request.status = "PENDING"
+            payment.service_request.save()
+
+        return Response(
+            {
+                "message": "Payment verified successfully.",
+                "status": "success",
+                "service_request_id": payment.service_request.id,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as sig_error:  # razorpay.errors.SignatureVerificationError
+        # Signature invalid — mark as failed
+        with transaction.atomic():
+            payment.status = "FAILED"
+            payment.save()
+
+            payment.service_request.status = "CANCELLED"
+            payment.service_request.save()
+
+        return Response(
+            {"error": "Payment verification failed. Invalid signature.", "status": "failed"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+@csrf_exempt
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
+def razorpay_webhook(request):
+    """
+    Razorpay server-to-server webhook callback.
+    No JWT auth — verified using webhook signature instead.
+    Acts as a safety net for missed browser-side verifications.
+    """
+    webhook_secret = django_settings.RAZORPAY_WEBHOOK_SECRET
+    received_signature = request.headers.get("X-Razorpay-Signature", "")
+
+    if not webhook_secret:
+        return Response(
+            {"error": "Webhook secret not configured."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    # Verify webhook signature
+    try:
+        client = get_razorpay_client()
+        client.utility.verify_webhook_signature(
+            request.body.decode("utf-8"),
+            received_signature,
+            webhook_secret,
+        )
+    except Exception as sig_error:  # razorpay.errors.SignatureVerificationError
+        return Response(
+            {"error": "Invalid webhook signature."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Parse the event
+    payload = request.data
+    event = payload.get("event", "")
+
+    if event == "payment.captured":
+        payment_entity = payload.get("payload", {}).get("payment", {}).get("entity", {})
+        order_id = payment_entity.get("order_id")
+        payment_id = payment_entity.get("id")
+
+        if order_id:
+            try:
+                with transaction.atomic():
+                    payment = Payment.objects.select_related("service_request").get(
+                        razorpay_order_id=order_id
+                    )
+                    if payment.status != "PAID":
+                        payment.razorpay_payment_id = payment_id
+                        payment.status = "PAID"
+                        payment.save()
+
+                        payment.service_request.status = "PENDING"
+                        payment.service_request.save()
+            except Payment.DoesNotExist:
+                pass
+
+    elif event == "payment.failed":
+        payment_entity = payload.get("payload", {}).get("payment", {}).get("entity", {})
+        order_id = payment_entity.get("order_id")
+
+        if order_id:
+            try:
+                with transaction.atomic():
+                    payment = Payment.objects.select_related("service_request").get(
+                        razorpay_order_id=order_id
+                    )
+                    if payment.status not in ["PAID", "FAILED"]:
+                        payment.status = "FAILED"
+                        payment.save()
+
+                        payment.service_request.status = "CANCELLED"
+                        payment.service_request.save()
+            except Payment.DoesNotExist:
+                pass
+
+    return Response({"status": "ok"}, status=status.HTTP_200_OK)
