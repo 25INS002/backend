@@ -44,9 +44,7 @@
                 ],
                 "github": null,
                 "demo": null,
-                "images": [
-                    "http://72.60.102.111:8000/media/uploads/crepe-bandage.png"
-                ],
+                "images": "https://i2edc.iitjammu.ac.in/media/uploads/Screenshot_from_2025-09-04_03-11-08.png",
                 "date": "2024-06-01"
             },
             {
@@ -203,9 +201,9 @@
                     "Sensors",
                     "Simulation"
                 ],
-                "github": null,
-                "demo": null,
-                "images": "https://imgs.search.brave.com/IogdS2pmM014Xvx7O3hqAEsGyqwwGoiSbWs1uCaLGm8/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9wbHVz/LnVuc3BsYXNoLmNv/bS9wcmVtaXVtX3Bo/b3RvLTE2NjQyOTk3/NDk0ODEtYWM4ZGM4/YjQ5NzU0P2ZtPWpw/ZyZxPTYwJnc9MzAw/MCZhdXRvPWZvcm1h/dCZmaXQ9Y3JvcCZp/eGxpYj1yYi00LjEu/MCZpeGlkPU0zd3hN/akEzZkRCOE1IeHpa/V0Z5WTJoOE1UZDhm/R05oZEh4bGJud3dm/SHd3Zkh4OE1BPT0",
+                "github": "null",
+                "demo": "null",
+                "images": "https://i2edc.iitjammu.ac.in/media/uploads/front-facing-view-of-a-house-looking-from-the-street-austockphoto-000134929.webp",
                 "date": "2025-03-10"
             }
         ]
@@ -242,11 +240,11 @@
                 "gradient": "from-yellow-500 to-orange-500"
             },
             {
-                "title": "Education & Training",
-                "description": "Interactive learning and training devices",
-                "icon": "🎓",
-                "count": "1 Project",
-                "gradient": "from-indigo-500 to-purple-500"
+                "title": "",
+                "description": "",
+                "icon": "",
+                "count": "",
+                "gradient": ""
             }
         ]
     },

@@ -133,6 +133,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://i2edc.iitjammu.ac.in",
     "https://10.10.11.61"
 ]
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = False  # required if using HTTPS
 CSRF_COOKIE_SAMESITE = "None"
