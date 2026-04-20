@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Service, Availability, ServiceRequest
+from .models import Service, Availability, ServiceRequest, Payment
 from django.contrib.auth.models import User
 
 
@@ -169,6 +169,8 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     final_price = serializers.SerializerMethodField()
     plan_name = serializers.SerializerMethodField()
     can_be_cancelled = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
+    payment_id = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
@@ -186,6 +188,8 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             "final_price",
             "plan_name",
             "can_be_cancelled",
+            "payment_status",
+            "payment_id",
         ]
         read_only_fields = ["status", "remark", "requested_by"]
 
@@ -197,6 +201,18 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
 
     def get_can_be_cancelled(self, obj):
         return obj.can_be_cancelled()
+
+    def get_payment_status(self, obj):
+        try:
+            return obj.payment.status
+        except Payment.DoesNotExist:
+            return None
+
+    def get_payment_id(self, obj):
+        try:
+            return obj.payment.razorpay_payment_id
+        except Payment.DoesNotExist:
+            return None
 
 
 class ServiceRequestUpdateSerializer(serializers.ModelSerializer):
@@ -283,3 +299,54 @@ class ServiceListSerializer(serializers.ModelSerializer):
 
     def get_plan_count(self, obj):
         return len(obj.cost_discount)
+
+
+# ===================================================================
+# PAYMENT SERIALIZERS — Razorpay Integration
+# ===================================================================
+
+class PaymentSerializer(serializers.ModelSerializer):
+    amount_in_rupees = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = [
+            "id", "razorpay_order_id", "razorpay_payment_id",
+            "amount", "amount_in_rupees", "currency", "status",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = fields
+
+    def get_amount_in_rupees(self, obj):
+        return obj.amount / 100
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    service_id = serializers.IntegerField()
+    plan = serializers.DictField()
+    request_msg = serializers.DictField()
+
+    def validate_plan(self, value):
+        if "plan" not in value or "cost" not in value:
+            raise serializers.ValidationError("Plan must contain 'plan' and 'cost'")
+        cost = value.get("cost", 0)
+        discount = value.get("discount", 0)
+        if cost < 0 or discount < 0 or discount > cost:
+            raise serializers.ValidationError("Invalid cost or discount values")
+        return value
+
+    def validate_request_msg(self, value):
+        if "subject" not in value or "body" not in value:
+            raise serializers.ValidationError("Request message must have 'subject' and 'body'")
+        return value
+
+    def validate_service_id(self, value):
+        if not Service.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Service not found")
+        return value
+
+
+class VerifyPaymentSerializer(serializers.Serializer):
+    razorpay_order_id = serializers.CharField(max_length=100)
+    razorpay_payment_id = serializers.CharField(max_length=100)
+    razorpay_signature = serializers.CharField(max_length=256)

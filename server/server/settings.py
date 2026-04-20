@@ -41,6 +41,11 @@ EMAIL_HOST_USER = os.environ.get("GMAIL_USER")        # your Gmail address
 EMAIL_HOST_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")  # 16-char app password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# Razorpay Payment Gateway
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
+RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET")
+
 # Application definition
 
 INSTALLED_APPS = [
